@@ -1,0 +1,48 @@
+#!/bin/bash
+
+###
+#
+# SDDNS updatescript by Steffen Vogel (info@steffenvogel.de)
+# 
+# dependencies: wget, grep
+#
+################################################################################
+# Settings
+
+# Password
+PW=qU4rK5m1n1m4l
+
+# Hostname
+HOST=wg.sv
+
+# Zone
+ZONE=0l.de
+
+# Get netip
+IP=$(wget http://checkip.dyndns.org/ -q -O - | grep -Eo '\<[[:digit:]]{1,3}(\.[[:digit:]]{1,3}){3}\>')
+echo "Got netip: $IP"
+
+################################################################################
+# Expert settings
+
+# Time to live value in seconds for the alias rr
+TTL=120
+
+# Class
+CLASS=IN
+
+# Type
+TYPE=A
+
+# Record data
+RDATA=$IP
+
+################################################################################
+# Do not touch anything under this!
+
+REQUEST="host=$HOST&zone=$ZONE&ttl=$TTL&class=$CLASS&type=$TYPE&rdata=$RDATA&pw=$PW"
+
+echo "Deleting old record: http://0l.de/delete.xml?$REQUEST"
+wget -O- -q http://0l.de/delete.xml?$REQUEST
+echo "Adding new record: http://0l.de/add.xml?$REQUEST"
+wget -O- -q http://0l.de/add.xml?$REQUEST

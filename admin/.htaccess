@@ -1,0 +1,6 @@
+AuthType Basic
+AuthName "Administration area"
+AuthUserFile /var/www/nulll/.htpasswd
+AuthGroupFile /var/www/nulll/.htgroups
+Require group admins
+

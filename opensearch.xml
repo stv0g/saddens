@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+     <ShortName>Tiny DNS &amp; URL</ShortName>
+     <Description>Easily access short URLs and DNS names</Description>
+     <Image height="16" width="16" type="image/x-icon">http://d.0l.de/favicon.ico</Image>
+	 <InputEncoding>UTF-8</InputEncoding>
+     <OutputEncoding>UTF-8</OutputEncoding>
+     <Url type="text/html" template="http://{searchTerms}.0l.de"/>
+	 <Url type="application/opensearchdescription+xml" rel="self" template="http://d.0l.de/opensearch.xml" />
+</OpenSearchDescription>

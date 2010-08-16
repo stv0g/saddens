@@ -1,0 +1,15 @@
+#!/bin/bash
+
+cd /var/www/nulll/sddns
+
+if [ ! -e syslog2mysql.pipe  ]
+then
+	mkfifo syslog2mysql.pipe
+	chown root: syslog2mysql.pipe
+	chmod 700 syslog2mysql.pipe
+fi
+
+while [ -e syslog2mysql.pipe ]
+do
+   mysql st_sddns < syslog2mysql.pipe
+done
