@@ -144,7 +144,6 @@ class Zone extends NameServer implements Object {
 					
 					default:
 						$rdata = $result[4];
-					break;
 				}
 				
 				try {

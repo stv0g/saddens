@@ -3,17 +3,17 @@
 ###
 #
 # SDDNS updatescript by Steffen Vogel (info@steffenvogel.de)
-# 
-# dependencies: wget, grep
+#
+# dependencies: curl, grep
 #
 ################################################################################
 # Settings
 
 # Password
-PW=qU4rK5m1n1m4l
+PW=Robens123wg
 
 # Hostname
-HOST=wg.sv
+HOST=wg
 
 # Zone
 ZONE=0l.de
@@ -40,9 +40,7 @@ RDATA=$IP
 ################################################################################
 # Do not touch anything under this!
 
-REQUEST="host=$HOST&zone=$ZONE&ttl=$TTL&class=$CLASS&type=$TYPE&rdata=$RDATA&pw=$PW"
+URL="http://d.0l.de/update.xml?host=$HOST&zone=$ZONE&ttl=$TTL&class=$CLASS&type=$TYPE&rdata=$RDATA&pw=$PW"
 
-echo "Deleting old record: http://0l.de/delete.xml?$REQUEST"
-wget -O- -q http://0l.de/delete.xml?$REQUEST
-echo "Adding new record: http://0l.de/add.xml?$REQUEST"
-wget -O- -q http://0l.de/add.xml?$REQUEST
+echo "Updating record: $URL"
+curl "$URL"
