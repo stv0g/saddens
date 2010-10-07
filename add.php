@@ -66,7 +66,7 @@ if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 	}
 	else {
 		$uri = new Uri($rdata, $host);
-		$uri->frame = (isset($_GET['frame']) && $_GET['frame']) ? 1 : 0;
+		$uri->frame = (isset($_REQUEST['frame']) && $_REQUEST['frame']) ? 1 : 0;
 		$uri = $uri->add($db, $lifetime);
 		$output->add('uri redirection added to db', 'success', $uri);
 	}

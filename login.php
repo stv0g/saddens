@@ -1,7 +1,7 @@
 <?php
 
 require_once 'include/init.php';
-Output::start('html');
+$output = Output::start('html');
 
 if (!isAuthentificated()) {
     header('WWW-Authenticate: Basic realm="Administration area"');
