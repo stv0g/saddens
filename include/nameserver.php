@@ -115,12 +115,10 @@ class NameServer implements Object {
 		foreach ($return as $line) {
 			if (substr($line, 0, 1) != ';' && !empty($line)) {
 				$result = array();
-				$output->add('dig line', 'debug', 4, explode("\t", $line));
-				foreach (explode("\t", $line) as $column) {
+				foreach (preg_split("/\s+/", $line) as $column) {
 					if (!empty($column))
 					$result[] = $column;
 				}
-
 				$results[] = $result;
 			}
 		}
