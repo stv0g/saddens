@@ -10,7 +10,7 @@ $sql = 'SELECT *
 
 $result = $db->query($sql);
 
-$pattern = '/^named\[(\d+)\]: queries: info: client ([.\d]+)#(\d+): query: ([.-+\w]+) ([A-Z]+) ([A-Z]+) (.*)$/';
+$pattern = '/^named\[(\d+)\]: queries: info: client ([.\d]+)#(\d+): query: ([+.-\w]+) ([A-Z]+) ([A-Z]+) (.*)$/';
 $sqlDelete = 'DELETE FROM logs WHERE id IN (';
 $queries = array();
 $c = 0; $u = 0;
