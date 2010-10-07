@@ -105,14 +105,14 @@ class NameServer implements Object {
 
 		$cli = 'dig -c ' . $class . ' -t ' . $type . ' ' . $host . ' @' . $this->hostname . ' +noall +answer';
 		$output->add('execute dig', 'debug', 2, $cli);
-		exec(escapeshellcmd($cli), $output, $returnCode);
+		exec(escapeshellcmd($cli), $return, $returnCode);
 
 		if ($returnCode != 0)
 			throw new NameServerException('dig query failed with code: ' . $returnCode);
 
 		$results = array();
 
-		foreach ($output as $line) {
+		foreach ($return as $line) {
 			if (substr($line, 0, 1) != ';' && !empty($line)) {
 				$result = array();
 				$output->add('dig line', 'debug', 4, explode("\t", $line));
