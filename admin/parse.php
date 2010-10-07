@@ -7,10 +7,10 @@ $sql = 'SELECT *
 		WHERE
 			program = \'named\'
 		LIMIT 10000';
-			
+
 $result = $db->query($sql);
 
-$pattern = '/^named\[(\d+)\]: queries: info: client ([.\d]+)#(\d+): query: ([.-\w]+) ([A-Z]+) ([A-Z]+) (.*)$/';
+$pattern = '/^named\[(\d+)\]: queries: info: client ([.\d]+)#(\d+): query: ([.-+\w]+) ([A-Z]+) ([A-Z]+) (.*)$/';
 $sqlDelete = 'DELETE FROM logs WHERE id IN (';
 $queries = array();
 $c = 0; $u = 0;
@@ -33,21 +33,21 @@ foreach ($result as $log) {
 
 		foreach ($config['sddns']['zones'] as $zone) {
 			if (substr($query['hostname'], -strlen($zone->name)) == $zone->name && strlen($query['hostname']) > strlen($zone->name)) {
-			
+
 				$filter = array('class' => $query['class'],
 							'type' => $query['type'],
 							'host' => substr($query['hostname'], 0, -(strlen($zone->name) + 1)),
 							'zone' => $zone);
-				
+
 				$records = DBRecord::get($db, $filter);
-				
+
 				foreach ($records as $record) {
 					$record->lastAccessed = $query['queried'];
 					$record->update();
-					$output->add('record renewed', 'notice', 1,$record);
+					$output->add('record renewed', 'debug', 1, $record);
 				}
 			}
-		}		
+		}
 	}
 }
 
@@ -56,7 +56,7 @@ if ($c > 0) {
 	$output->add('parsed queries', 'success', $c);
 }
 else {
-	$output->add('no queries to parse', 'warning');
+	$output->add('no queries to parse', 'debug', 1);
 }
 
 ?>
