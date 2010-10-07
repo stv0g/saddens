@@ -12,7 +12,22 @@ if (count($uris) == 1) {
 	$uri->lastAccessed = time();
 	$uri->update();
 
-	header('Location: ' . $uri->uri);
+	if ($uri->frame) {
+echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+       "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head><title>/dev/nulll - Frame</title></head>
+	<body style="margin: 0; padding: 0; overflow: hidden;">
+		<table style="height: 100%; width: 100%; position: absolute; top: 0; left: 0;"><tr><td>
+		<iframe height="100%" width="100%" frameborder="0" marginheight="0" marginwidth="0" src="' . $uri->uri . '"></iframe>
+		</td></tr></table>
+	</body>
+</html>';
+
+	}
+	else {
+		header('Location: ' . $uri->uri);
+	}
 }
 else {
 	if (!empty($_SERVER['QUERY_STRING'])) {

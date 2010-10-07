@@ -1,6 +1,7 @@
 <?php
 require_once 'include/init.php';
 
+$output = Output::start();
 
 $pw = @$_REQUEST['pw'];
 
@@ -56,5 +57,7 @@ if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 else {
 	$output->add('zone not found', 'error', $_REQUEST['zone']);
 }
+
+Output::send();
 
 ?>

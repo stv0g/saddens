@@ -1,6 +1,7 @@
 <?php
 
 require_once '../../include/init.php';
+$output = Output::start();
 
 $result = $db->query('SELECT COUNT(*) AS count FROM queries', 1)->first();
 $count = $result['count'];
@@ -42,5 +43,7 @@ else {
 		$output->add($row['type'], 'data', round(($row['sum'] / $count) * 100, 5) . ' %', $row['sum']);
 	}
 }
+
+Output::send();
 
 ?>

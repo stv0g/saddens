@@ -24,6 +24,7 @@ class DBUri extends Uri implements DBObject {
 		$this->lastAccessed = strtotime($uri['last_accessed']);
 		$this->lifetime = $uri['lifetime'];
 		$this->accessed = $uri['accessed'];
+		$this->frame = $uri['frame'];
 		$this->host = new DBHost($uri['host_id'], $this->db);
 
 		parent::__construct($uri['uri'], $this->host);
@@ -40,6 +41,7 @@ class DBUri extends Uri implements DBObject {
 				SET
 					host_id = ' . (int) $this->host->id . ',
 					uri = \'' . $this->db->escape($this->uri) . '\',
+					frame = ' . (($this->frame) ? 1 : 0) . ',
 					accessed = ' . (int) $this->accessed . ',
 					last_accessed = \'' . date('Y-m-d H:i:s', $this->lastAccessed) . '\',
 					lifetime = ' . (int) $this->lifetime . '

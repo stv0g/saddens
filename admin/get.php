@@ -1,6 +1,8 @@
 <?php
 require_once '../include/init.php';
 
+$output = Output::start();
+
 $dataTables = array(
 			'hosts' => null,	// table name => date field
 			'records' => 'created',
@@ -200,4 +202,7 @@ else {
 		}
 	}
 }
+
+Output::send();
+
 ?>

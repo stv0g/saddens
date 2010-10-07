@@ -1,5 +1,6 @@
 <?php
 require_once 'include/init.php';
+$output = Output::start('html');
 ?>        
 <div id="simple">
 
@@ -45,3 +46,7 @@ if (!isAuthentificated())
 </footer>
 
 </div>
+
+<?php
+Output::send();
+?>

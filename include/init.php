@@ -35,41 +35,16 @@ $site['url'] = 'http://' . $site['hostname'] . $site['path']['web'];
 
 // debug mode
 if (@isset($_REQUEST['debug'])) {
-	$debug = (int) $_REQUEST['debug'];
+	$site['debug'] = (int) $_REQUEST['debug'];
 }
 else {
 	if (isAuthentificated()) {
-		$debug = 1;
+		$site['debug'] = 3;
 	}
 	else {
-		$debug = 0;
+		$site['debug'] = 0;
 	}
 }
-
-// output
-if (isset($argc))
-	$format = 'txt';
-elseif ($_SERVER['SERVER_NAME'] === 'members.dyndns.org')
-	$format = 'dyndns';
-elseif (empty($_REQUEST['format']) || @$_REQUEST['format'] == 'php')
-	$format = 'html';
-else
-	$format = $_REQUEST['format'];
-
-$output = Output::getInstance($format, $debug);
-Registry::set('output', $output);
-
-// errorhandling
-set_exception_handler(array($output, 'exception_handler'));
-set_error_handler(array($output, 'error_handler'), E_ALL);
-
-$parameters = array();
-foreach ($_REQUEST as $parName => $parValue) {
-	$parameters[] = $parName . ' => ' . $parValue;
-}
-
-$output->add('debug level', 'debug', 2, $output->debug);
-$output->add('parameters', 'debug', 2, $parameters);
 
 // simple hit counting
 $file = $site['path']['server'] . '/include/hits.txt';

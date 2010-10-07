@@ -1,6 +1,7 @@
 <?php
 
 require_once dirname(__FILE__) . '/../include/init.php';
+$output = Output::start();
 
 $sql = 'SELECT *
 		FROM logs
@@ -58,5 +59,7 @@ if ($c > 0) {
 else {
 	$output->add('no queries to parse', 'debug', 1);
 }
+
+Output::send();
 
 ?>

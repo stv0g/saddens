@@ -2,7 +2,7 @@
 
 class Uri implements Object {
 	
-	public $uri, $host;
+	public $uri, $host, $frame;
 	
 	/*
 	 * Constructor
@@ -19,9 +19,10 @@ class Uri implements Object {
 		$config = Registry::get('config');
 		$db = Registry::get('db');
 
-		$sql = 'INSERT INTO ' . $config['db']['tbl']['uris'] . ' (host_id, uri, lifetime, last_accessed, created, ip) VALUES(
+		$sql = 'INSERT INTO ' . $config['db']['tbl']['uris'] . ' (host_id, uri, frame, lifetime, last_accessed, created, ip) VALUES(
 					' . $this->host->id . ',
 					\'' . $this->uri . '\',
+					' . (($this->frame) ? 1 : 0) . ',
 					' . $lifetime . ',
 					NOW(),
 					NOW(),

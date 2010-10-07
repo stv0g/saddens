@@ -1,5 +1,7 @@
 <?php
 
+$output = Output::start();
+
 require_once dirname(__FILE__) . '/../include/init.php';
 
 if (empty($_REQUEST['zone']) || $_REQUEST['zone'] == 'all') {
@@ -17,5 +19,6 @@ foreach ($zones as $zone) {
 	$zone->cleanup($db);
 }
 
+Output::send();
 
 ?>

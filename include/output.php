@@ -335,6 +335,41 @@ abstract class Output {
 		}
 	}
 
+	static function start($forced = null) {
+		global $argc;
+
+		$site = Registry::get('site');
+	
+		if (isset($forced))
+			$format = $forced;
+		elseif (isset($argc))
+		        $format = 'txt';
+		elseif ($_SERVER['SERVER_NAME'] === 'members.dyndns.org')
+		        $format = 'dyndns';
+		elseif (empty($_REQUEST['format']) || @$_REQUEST['format'] == 'php')
+		        $format = 'html';
+		else
+		        $format = $_REQUEST['format'];
+
+		$output = self::getInstance($format, $site['debug']);
+		Registry::set('output', $output);
+
+		// errorhandling
+		set_exception_handler(array($output, 'exception_handler'));
+		set_error_handler(array($output, 'error_handler'), E_ALL);
+
+		// debugging
+		$parameters = array();
+		foreach ($_REQUEST as $parName => $parValue) {
+		        $parameters[] = $parName . ' => ' . $parValue;
+		}
+
+		$output->add('debug level', 'debug', 2, $output->debug);
+		$output->add('parameters', 'debug', 2, $parameters);
+
+		return $output;
+	}
+
 	function exception_handler($exception) {
 		$this->add('unhandled ' . get_class($exception), 'exception', $exception);
 	}
@@ -370,8 +405,9 @@ abstract class Output {
 
 	abstract protected function getOutput();
 
-	public function __destruct() {
-		echo $this->getOutput();
+	static function send() {
+		if ($output = Registry::get('output'))
+			echo $output->getOutput();
 	}
 }
 

@@ -1,6 +1,8 @@
 <?php
 require_once 'include/init.php';
 
+$output = Output::start('html');
+
 $output->add('hits since launch', 'notice', $site['hits']);
 
 if (isAuthentificated()) {
@@ -100,3 +102,7 @@ $checkedType = (isset($_REQUEST['type'])) ? $_REQUEST['type'] : $config['sddns']
 <hr />
 <address><?= $_SERVER['SERVER_SIGNATURE'] ?></address>
 </div>
+
+<?php
+Output::send();
+?>

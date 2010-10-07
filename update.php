@@ -1,6 +1,7 @@
 <?php
 
 require_once 'include/init.php';
+$output = Output::start();
 
 // http://www.dyndns.com/developers/specs/syntax.html
 /*$user = $_SERVER['PHP_AUTH_USER'];	// unused!
@@ -92,14 +93,5 @@ else {
 	$output->add('zone not found', 'error', $_REQUEST['host'], $_REQUEST['zone']);
 }
 
-
-
-
-
-
-
-
-
-
-
+Output::send();
 ?>

@@ -1,5 +1,6 @@
 <?php
 require_once '../include/init.php';
+$output = Output::start();
 
 $ns = new NameServer($config['sddns']['ns']['hostname'], $config['sddns']['ns']['port']);
 
@@ -17,5 +18,7 @@ $results = $zone->getRecordsFromNS();
 foreach ($results as $result) {
 	$output->add('', 'data', $result);
 }
+
+Output::send();
 
 ?>
