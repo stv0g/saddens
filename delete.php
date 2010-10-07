@@ -9,17 +9,15 @@ if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 	$zone = $config['sddns']['zones'][$_REQUEST['zone']];
 	
 	if (!empty($_REQUEST['host'])) {
-		$host = reset(DBHost::get($db, array('host' => $_REQUEST['host'], 'zone' => $zone)));
-		
-		if (!empty($host)) {
+		if ($host = reset(DBHost::get($db, array('host' => $_REQUEST['host'], 'zone' => $zone)))) {
 			if ($host->checkPassword($pw)  || isAuthentificated()) {
-				if (!empty($_REQUEST['class']) && in_array($_REQUEST['class'], $config['sddns']['classes']))
+				if (isset($_REQUEST['class']) && in_array($_REQUEST['class'], $config['sddns']['classes']))
 					$class = $_REQUEST['class'];
 				
-				if (!empty($_REQUEST['type']) && in_array($_REQUEST['type'], $config['sddns']['types'])) {
+				if (isset($_REQUEST['type']) && in_array($_REQUEST['type'], $config['sddns']['types'])) {
 					$type = $_REQUEST['type'];
 					
-					if (!empty($_REQUEST['rdata']) && Record::isRData($_REQUEST['rdata'], $type))
+					if (isset($_REQUEST['rdata']) && Record::isRData($_REQUEST['rdata'], $type))
 						$rdata = $_REQUEST['rdata'];
 				}
 				
@@ -58,6 +56,6 @@ else {
 	$output->add('zone not found', 'error', $_REQUEST['zone']);
 }
 
-Output::send();
+$output->send();
 
 ?>

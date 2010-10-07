@@ -83,12 +83,8 @@ $checkedType = (isset($_REQUEST['type'])) ? $_REQUEST['type'] : $config['sddns']
 	
 					<option><i>all</i></option></select></td>
 		</tr>
-		<tr><td><label for="rdata">rdata</label></td><td><input value="<?= (empty($_REQUEST['rdata']) && $checkedType == 'A') ? $_SERVER['REMOTE_ADDR'] : @$_REQUEST['rdata'] ?>" type="text" name="rdata" /></td><td></td></tr>
-
-		<?php
-		if (!isAuthentificated())	// admin needs no password
-			echo '<tr><td><label for="pw">password</label></td><td><input type="password" name="pw" /></td><td>optional; random generated</td></tr>';
-		?>
+		<tr><td><label for="rdata">rdata</label></td><td><input value="<?= (empty($_REQUEST['rdata']) && $checkedType == 'A') ? $_SERVER['REMOTE_ADDR'] : @$_REQUEST['rdata'] ?>" type="text" name="rdata" /></td><td><input type="checkbox" value="1" name="frame" /> hide uri in a frameset</td></tr>
+		<tr><td><label for="pw">password</label></td><td><input type="password" name="pw" /></td><td>optional; random generated</td></tr>
 
 	</table>
 	<input type="submit" />
@@ -104,5 +100,5 @@ $checkedType = (isset($_REQUEST['type'])) ? $_REQUEST['type'] : $config['sddns']
 </div>
 
 <?php
-Output::send();
+$output->send();
 ?>

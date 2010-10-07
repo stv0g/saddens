@@ -48,5 +48,5 @@ if (!isAuthentificated())
 </div>
 
 <?php
-Output::send();
+$output->send();
 ?>

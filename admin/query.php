@@ -19,6 +19,6 @@ foreach ($results as $result) {
 	$output->add('', 'data', $result);
 }
 
-Output::send();
+$output->send();
 
 ?>

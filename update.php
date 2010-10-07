@@ -93,5 +93,5 @@ else {
 	$output->add('zone not found', 'error', $_REQUEST['host'], $_REQUEST['zone']);
 }
 
-Output::send();
+$output->send();
 ?>

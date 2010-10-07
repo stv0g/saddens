@@ -15,6 +15,6 @@ foreach ($zones as $zone) {
 	$zone->sync($db);
 }
 
-Output::send();
+$output->send();
 
 ?>

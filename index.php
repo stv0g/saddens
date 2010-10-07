@@ -18,9 +18,7 @@ echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 <html>
 <head><title>/dev/nulll - Frame</title></head>
 	<body style="margin: 0; padding: 0; overflow: hidden;">
-		<table style="height: 100%; width: 100%; position: absolute; top: 0; left: 0;"><tr><td>
-		<iframe height="100%" width="100%" frameborder="0" marginheight="0" marginwidth="0" src="' . $uri->uri . '"></iframe>
-		</td></tr></table>
+		<iframe style="height: 100%; width: 100%; position: absolute; top: 0; left: 0;" height="100%" width="100%" frameborder="0" marginheight="0" marginwidth="0" src="' . $uri->uri . '"></iframe>
 	</body>
 </html>';
 

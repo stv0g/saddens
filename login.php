@@ -20,6 +20,6 @@ the credentials required.</p>
    $output->add('authentificated as', 'notice', $_SERVER['PHP_AUTH_USER']);
 }
 
-Output::send()
+$output->send()
 
 ?>

@@ -9,6 +9,6 @@ foreach ($result as $row) {
 	$output->add($row['hostname'], 'data', $row['sum']);
 }
 
-Output::send();
+$output->send();
 
 ?>

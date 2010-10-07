@@ -5,7 +5,8 @@ $output = Output::start();
 
 if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 	$zone = $config['sddns']['zones'][$_REQUEST['zone']];
-
+	$type = (empty($_REQUEST['type'])) ? $config['sddns']['std']['type'] : $_REQUEST['type'];
+	$rdata = (empty($_REQUEST['rdata']) && $type = 'A') ? $_SERVER['REMOTE_ADDR'] : $_REQUEST['rdata'];
 	$host = (empty($_REQUEST['host'])) ? Host::unique($zone, $db) : new Host($_REQUEST['host'], $zone);
 	$pw = (empty($_REQUEST['pw'])) ? randomString(8) : $_REQUEST['pw'];
 	
@@ -21,11 +22,18 @@ if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 	}
 	
 	if ($host->isRegistred($db)) {
+		if ($type == 'URL') {
+			$output->add('host is already registred', 'error', $host);
+			$output->send();
+			die();
+		}
+
 		$host = new DBHost($host->isRegistred($db), $db);
 		$output->add('found existing host' ,'notice', $host);
 		
 		if (!$host->checkPassword($pw)) {
 			$output->add('not authentificated for host', 'error', $host);
+			$output->send();
 			die();
 		}
 	}
@@ -36,9 +44,6 @@ if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 		if (empty($_REQUEST['pw']))
 			$output->add('generated password' ,'notice', $pw);
 	}
-	
-	$type = (empty($_REQUEST['type'])) ? $config['sddns']['std']['type'] : $_REQUEST['type'];
-	$rdata = (empty($_REQUEST['rdata']) && $type = 'A') ? $_SERVER['REMOTE_ADDR'] : $_REQUEST['rdata'];
 	
 	if ($type != 'URL') {	// pseudo type to create url redirection
 		$ttl = (empty($_REQUEST['ttl'])) ? $config['sddns']['std']['ttl'] : (int) $_REQUEST['ttl'];
@@ -55,11 +60,13 @@ if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 		}
 		else {
 			$output->add('record already exists in db', 'error', $record);
+			$output->send();
 			die();
 		}
 	}
 	else {
 		$uri = new Uri($rdata, $host);
+		$uri->frame = (isset($_GET['frame']) && $_GET['frame']) ? 1 : 0;
 		$uri = $uri->add($db, $lifetime);
 		$output->add('uri redirection added to db', 'success', $uri);
 	}
@@ -68,6 +75,6 @@ else {
 	$output->add('zone not found', 'error', $_REQUEST['zone']);
 }
 
-Output::send();
+$output->send();
 
 ?>

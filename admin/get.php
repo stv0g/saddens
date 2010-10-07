@@ -11,19 +11,33 @@ $dataTables = array(
 			'uris' => 'created'
 		);
 
+$perModes = array(
+			'hour' => false,	// mySQL funtion => is timestamp
+			'day' => false,
+			'date' => true,
+			'week' => false,
+			'month' => false,
+			'weekday' => false
+		);
+
 $colors = array(
-			'records' => 'midnightblue',
+			'records' => 'blue',
 			'queries' => 'red',
 			'logs' => 'orange',
 			'uris' => 'black'
 		);
 
-if (@!empty($_REQUEST['data'])) {
-	$tmps = explode(',', trim($_REQUEST['data'], ' ,'));
-
-	foreach ($tmps as $tmp) {
-		if (in_array(trim($tmp), array_keys($dataTables)) && !($output instanceof GraphOutput && !$dataTables[trim($tmp)]))
+$get = array();
+if (isset($_REQUEST['data'])) {
+	foreach (explode(',', $_REQUEST['data']) as $tmp) {
+		if (in_array($tmp, array_keys($dataTables)) && !($output instanceof GraphOutput && !$dataTables[$tmp])) {
 			$get[] = trim($tmp);
+		}
+		else {
+			$output->add('invalid data', 'error', $tmp);
+			$output->send();
+			die();
+		}		
 	}
 }
 else {
@@ -34,18 +48,15 @@ if ($output instanceof GraphOutput) {
 	require_once $site['path']['server'] . '/include/jpgraph/jpgraph_line.php';
 	require_once $site['path']['server'] . '/include/jpgraph/jpgraph_date.php';
 
-	$perModes = array(
-				'hour' => false,	// mySQL funtion => is timestamp
-				'day' => false,
-				'date' => true,
-				'week' => false,
-				'month' => false,
-				'weekday' => false
-			);
-
-	if (@isset($_REQUEST['per'])) {
-	        if (in_array($_REQUEST['per'], array_keys($perModes)))
+	if (isset($_REQUEST['per'])) {
+	        if (in_array($_REQUEST['per'], array_keys($perModes))) {
 	                $per = $_REQUEST['per'];
+		}
+		else {
+			$output->add('unknown grouping mode', 'error', $_REQUEST['per']);
+			$output->send();
+			die();
+		}
 	}
 	else {
 	        $per = 'date';
@@ -62,9 +73,7 @@ if ($output instanceof GraphOutput) {
 	}
 	else {
 		$graph->SetScale('intint');
-		$graph->xaxis->SetLabelFormatCallback(function($label) {
-			global $per;
-
+		$graph->xaxis->SetLabelFormatCallback(function($label) use ($per) {
 			switch ($per) {
 				case 'month':
 					return date('M', mktime(0, 0, 0, $label));
@@ -203,6 +212,6 @@ else {
 	}
 }
 
-Output::send();
+$output->send();
 
 ?>

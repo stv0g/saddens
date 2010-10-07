@@ -405,9 +405,8 @@ abstract class Output {
 
 	abstract protected function getOutput();
 
-	static function send() {
-		if ($output = Registry::get('output'))
-			echo $output->getOutput();
+	function send() {
+		echo $this->getOutput();
 	}
 }
 

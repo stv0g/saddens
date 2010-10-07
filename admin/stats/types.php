@@ -44,6 +44,6 @@ else {
 	}
 }
 
-Output::send();
+$output->send();
 
 ?>

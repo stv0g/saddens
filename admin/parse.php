@@ -60,6 +60,6 @@ else {
 	$output->add('no queries to parse', 'debug', 1);
 }
 
-Output::send();
+$output->send();
 
 ?>
