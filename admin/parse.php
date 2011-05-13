@@ -11,19 +11,19 @@ $sql = 'SELECT *
 
 $result = $db->query($sql);
 
-$pattern = '/^named\[(\d+)\]: queries: info: client ([.\d]+)#(\d+): query: ([+.-\w]+) ([A-Z]+) ([A-Z]+) (.*)$/';
+$pattern = '/^queries: info: client ([.\d]+)#(\d+): query: ([+.-\w]+) ([A-Z]+) ([A-Z]+) (.*) \(([.\d]+)\)$/';
 $sqlDelete = 'DELETE FROM logs WHERE id IN (';
 $queries = array();
 $c = 0; $u = 0;
 
 foreach ($result as $log) {
 	if (preg_match($pattern, $log['message'], $matches)) {
-		$query = array('ip' => new IpV4($matches[2]),
-				'port' => (int) $matches[3],
-				'hostname' => $matches[4],
-				'class' => $matches[5],
-				'type' => $matches[6],
-				'options' => $matches[7],
+		$query = array('ip' => new IpV4($matches[1]),
+				'port' => (int) $matches[2],
+				'hostname' => $matches[3],
+				'class' => $matches[4],
+				'type' => $matches[5],
+				'options' => $matches[6],
 				'log_id' => $log['id'],
 				'queried' => strtotime($log['logged']));
 
@@ -45,7 +45,7 @@ foreach ($result as $log) {
 				foreach ($records as $record) {
 					$record->lastAccessed = $query['queried'];
 					$record->update();
-					$output->add('record renewed', 'debug', 1, $record);
+					$output->add('record renewed', 'success', $record);
 				}
 			}
 		}
