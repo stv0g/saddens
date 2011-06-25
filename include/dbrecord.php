@@ -4,7 +4,7 @@ class DBRecord extends Record implements DBObject {
 	public $id;
 	public $lifetime;
 	public $lastAccessed;
-	
+
 	private $db;
 
 	public function __construct($id, Database $db) {
@@ -26,14 +26,14 @@ class DBRecord extends Record implements DBObject {
 
 		parent::__construct($this->host, (int) $record['ttl'], $record['class'], $record['type'], $record['rdata']);
 	}
-	
+
 	public function __destruct() {
 		//$this->update();
 	}
-	
+
 	public function update() {
 		$config = Registry::get('config');
-		
+
 		$sql = 'UPDATE ' . $config['db']['tbl']['records'] . '
 				SET
 					lifetime = ' . (int) $this->lifetime . ',
@@ -44,18 +44,18 @@ class DBRecord extends Record implements DBObject {
 					type = \'' . $this->db->escape($this->type) . '\',
 					rdata = \'' . $this->db->escape( $this->rdata) . '\'
 				WHERE id = ' . (int) $this->id;
-				
+
 		$this->db->execute($sql);
 	}
-	
+
 	public function toXml(DOMDocument $doc) {
 		$xmlRecord = parent::toXml($doc);
 
 		$xmlRecord->setAttribute('id', $this->id);
-		
+
 		$xmlRecord->appendChild($doc->createElement('lifetime', $this->lifetime));
 		$xmlRecord->appendChild($doc->createElement('lastaccessed', $this->lastAccessed));
-		
+
 		return $xmlRecord;
 	}
 
@@ -64,10 +64,10 @@ class DBRecord extends Record implements DBObject {
 
 		$sql = 'DELETE FROM ' . $config['db']['tbl']['records'] . '
 				WHERE id = ' . (int) $this->id;
-		
+
 		$this->db->execute($sql);
 	}
-	
+
 	public static function get(Database $db, $filter = false) {
 		$config = Registry::get('config');
 
@@ -76,7 +76,7 @@ class DBRecord extends Record implements DBObject {
 				LEFT JOIN ' .  $config['db']['tbl']['hosts'] . ' AS h
 				ON h.id = r.host_id
 				WHERE true';
-				
+
 				if (!empty($filter['id']))
 					$sql .= ' && id = ' . (int) $filter['id'];
 				if (!empty($filter['host']) && $filter['host'] instanceof Host)
@@ -99,9 +99,9 @@ class DBRecord extends Record implements DBObject {
 					$sql .= ' && ttl = ' . (int) $filter['ttl'];
 
 		$sql .= ' ORDER BY r.id ASC';
-		
+
 		$result = $db->query($sql);
-		
+
 		$records = array();
 		foreach ($result as $record) {
 			$records[] = new self($record['id'], $db);

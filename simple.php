@@ -5,7 +5,7 @@ $output = Output::start('html');
 <div id="simple">
 
 <header>
-  <a href="http://0l.de"><img src="http://0l.de/_media/nulll_small.png" alt="0l" /></a>
+  <a href="http://0l.de"><img src="images/nulll_small.png" alt="/dev/nulll" /></a>
   <h1>Tiny DNS &amp; URL</h1>
 </header>
 
@@ -21,7 +21,7 @@ $output = Output::start('html');
         <?php  } ?>
      </select>
     </dd>
-    
+
     <dt><label for="rdata"><a href="http://de.wikipedia.org/wiki/IP-Adresse">IP</a> / <a href="http://de.wikipedia.org/wiki/Uniform_Resource_Locator">URL</a></label></dt>
     <dd><input style="width:217px" tabindex="2" value="<?= isset($_REQUEST['rdata']) ? $_REQUEST['rdata'] : $_SERVER['REMOTE_ADDR'] ?>" type="text" name="rdata" /></dd>
 
@@ -32,10 +32,9 @@ if (!isAuthentificated())
 ?>
 
   </dl>
-  
+
   <input type="submit" tabindex="4" value="register" />
   <input type="hidden" name="type" value="A" />
-  
 </form>
 
 <iframe name="ifr" id="ifr"></iframe>

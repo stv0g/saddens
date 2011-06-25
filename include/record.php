@@ -9,7 +9,7 @@ class Record implements Object {
 		$config = Registry::get('config');
 
 		$this->host = $host;
-		
+
 		if (is_int($ttl) && $ttl > 0 && $ttl <= $config['sddns']['max_ttl']) {
 			$this->ttl = $ttl;
 		} else {
@@ -30,8 +30,7 @@ class Record implements Object {
 
 		$this->setRData($rdata);
 	}
-	
-	
+
 	/*
 	 * Setter & Getter
 	 */
@@ -58,7 +57,7 @@ class Record implements Object {
 	public function add(Database $db, $lifetime) {
 		$config = Registry::get('config');
 		$db = Registry::get('db');
-		
+
 		if ($this->host->isRegistred($db)) {
 			$host = new DBHost($this->host->isRegistred($db), $db);
 		}
@@ -76,10 +75,10 @@ class Record implements Object {
 					NOW(),
 					' . (int) $lifetime . ',
 					\'' . $db->escape($_SERVER['REMOTE_ADDR']) . '\')';
-		
+
 
 		$db->execute($sql);
-		
+
 		return new DBRecord($db->lastId(), $db);
 	}
 
@@ -102,10 +101,10 @@ class Record implements Object {
 			case 'NS':
 				$valid = Host::isValid($rdata);
 				break;
-				
+
 			case 'URL':
 				$valid = Uri::isValid($rdata);
-					
+
 			default:
 				$valid = true;
 				break;
@@ -113,7 +112,7 @@ class Record implements Object {
 
 		return $valid;
 	}
-	
+
 	public function isRegistred(Database $db) {
 		$config = Registry::get('config');
 
@@ -130,8 +129,7 @@ class Record implements Object {
 
 		return ($result->count() > 0) ? $record['id'] : false;
 	}
-	
-	
+
 	/*
 	 * Output
 	 */
@@ -158,7 +156,7 @@ class Record implements Object {
 		$xmlRecord->appendChild($doc->createElement('ttl', $this->ttl));
 		$xmlRecord->appendChild($doc->createElement('class', $this->class));
 		$xmlRecord->appendChild($doc->createElement('type', $this->type));
-		
+
 		switch ($this->type) {
                         case 'A':
                         case 'AAAA':
@@ -170,27 +168,27 @@ class Record implements Object {
 
 		return $xmlRecord;
 	}
-	
+
 	public function toHtml() {
 		$html = '' . $this->host->toHtml() . '&nbsp;<a target="_blank" href="/?host=' . $this->host->toPunycode() . '&ttl=' . $this->ttl . '&type=' . $this->type . '&class=' . $this->class . '&rdata=' . $this->rdata . '">' . $this->ttl . '&nbsp;' . $this->class . '&nbsp;' . $this->type . '</a>';
-		
+
 		$html .= '&nbsp;';
 		switch ($this->type) {
 			case 'A':
 			case 'AAAA':
 				$html .= $this->rdata->toHtml();
 			break;
-			
+
 			case 'NS':
 			case 'CNAME':
 				$html .= '<a target="_blank" href="http://' . $this->rdata . '">' . $this->rdata . '</a>';
 			break;
-			
+
 			default:
 				$html .= $this->rdata;
 			break;
 		}
-		
+
 		return $html; 
 	}
 }
