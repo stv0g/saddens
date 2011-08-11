@@ -1,7 +1,7 @@
 <?php
 
 require_once 'include/init.php';
-$output = Output::start()
+$output = Output::start();
 
 $ip = new IpV4($_SERVER['REMOTE_ADDR']);
 

@@ -2,7 +2,7 @@
 
 require_once 'include/init.php';
 
-$filter = array('host' => $_REQUEST['host'], 'zone' => $_REQUEST['zone']);
+$filter = array('host' => @$_REQUEST['host'], 'zone' => @$_REQUEST['zone']);
 $uris = DBUri::get($db, $filter);
 
 if (count($uris) == 1) {

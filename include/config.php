@@ -4,7 +4,7 @@ $config['path']['web'] = '';
 
 $config['db']['host'] = 'localhost';
 $config['db']['user'] = 'sddns';
-$config['db']['pw'] = 'vunN2qQGtAPNzC3e';
+$config['db']['pw'] = 'RjRXDa68hnS5A8mX';
 $config['db']['db'] = 'st_sddns';
 $config['db']['tbl']['prefix'] = '';
 $config['db']['tbl']['records'] = $config['db']['tbl']['prefix'] . 'records';
