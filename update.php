@@ -68,12 +68,12 @@ if (!empty($zone)) {
 				$records[0]->lastAccessed = time();
 				$records[0]->update();
 				$output->add('record updated in db', 'success', $records[0]);
-				
+
 				for ($i = 1; $i < count($records); $i++) {
 					$records[$i]->delete();
 					$output->add('record deleted from db', 'warning', $records[$i]);
 				}
-				
+
 				$zone->cleanup($db);
 				$zone->sync($db);
 			}

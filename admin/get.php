@@ -4,28 +4,28 @@ require_once '../include/init.php';
 $output = Output::start();
 
 $dataTables = array(
-			'hosts' => null,	// table name => date field
-			'records' => 'created',
-			'queries' => 'queried',
-			'logs' => 'logged',
-			'uris' => 'created'
-		);
+	'hosts' => null,	// table name => date field
+	'records' => 'created',
+	'queries' => 'queried',
+	'logs' => 'logged',
+	'uris' => 'created'
+);
 
 $perModes = array(
-			'hour' => false,	// mySQL funtion => is timestamp
-			'day' => false,
-			'date' => true,
-			'week' => false,
-			'month' => false,
-			'weekday' => false
-		);
+	'hour' => false,	// mySQL funtion => is timestamp
+	'day' => false,
+	'date' => true,
+	'week' => false,
+	'month' => false,
+	'weekday' => false
+);
 
 $colors = array(
-			'records' => 'blue',
-			'queries' => 'red',
-			'logs' => 'orange',
-			'uris' => 'black'
-		);
+	'records' => 'blue',
+	'queries' => 'red',
+	'logs' => 'orange',
+	'uris' => 'black'
+);
 
 $get = array();
 if (isset($_REQUEST['data'])) {
@@ -37,11 +37,11 @@ if (isset($_REQUEST['data'])) {
 			$output->add('invalid data', 'error', $tmp);
 			$output->send();
 			die();
-		}		
+		}
 	}
 }
 else {
-	$get = array('queries');
+	$get = array('records');
 }
 
 if ($output instanceof GraphOutput) {
@@ -64,7 +64,7 @@ if ($output instanceof GraphOutput) {
 
 	$graph = $output->getGraph(700, 300);
 	$graph->img->SetAntiAliasing();
-	
+
 	if ($perModes[$per]) {
 		$graph->SetScale('datint');
 		$graph->xaxis->scale->SetTimeAlign(HOURADJ_1);
@@ -123,8 +123,8 @@ if ($output instanceof GraphOutput) {
 			array_walk($plotData['x'], function(&$value) { $value = strtotime($value); });
 
 		$plot = new LinePlot($plotData['y'], $plotData['x']);
-		$plot->SetColor($colors[$table]); 
-		$plot->SetLegend($table); 
+		$plot->SetColor($colors[$table]);
+		$plot->SetLegend($table);
 		$plot->SetLineWeight(2);
 
 		$graph->Add($plot);
@@ -138,51 +138,51 @@ else {
 			$filter = array();
 			if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 				$filter['zone'] = $config['sddns']['zones'][$_REQUEST['zone']];
-				
+
 				if (!empty($_REQUEST['host'])) {
 					$filter['host'] = $_REQUEST['host'];
 				}
 			}
-		
+
 			$data = DBHost::get($db, $filter);
 			$dateField = null;
 			break;
-		
+
 		case 'logs':
 			$data = $db->query('SELECT logged, id, program, message FROM logs ORDER BY logged DESC', 1000);
 			$dateField = 'logged';
 			break;
-		
+
 		case 'queries':
 			$data = $db->query('SELECT queried, id, ip, port, hostname, class, type, options FROM queries ORDER BY queried DESC', 1000);
 			$dateField = 'queried';
 			break;
-		
+
 		case 'uris':
 			$filter = array();
 			if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 				$filter['zone'] = $config['sddns']['zones'][$_REQUEST['zone']];
-		
+
 				if (!empty($_REQUEST['host'])) {
 					$filter['host'] = $_REQUEST['host'];
 				}
 			}
-		
+
 			$data = DBUri::get($db, $filter);
 			$dateField = 'created';
 			break;
-	
+
 		case 'records':
 		default:
 			$filter = array();
 			if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 				$filter['zone'] = $config['sddns']['zones'][$_REQUEST['zone']];
-		
+
 				if (!empty($_REQUEST['host'])) {
 					$filter['host'] = $_REQUEST['host'];
 				}
 			}
-		
+
 			if (!empty($_REQUEST['class']) && in_array($_REQUEST['class'], $config['sddns']['classes']))
 				$filter['class'] = $_REQUEST['class'];
 			if (!empty($_REQUEST['ttl']))
@@ -192,22 +192,41 @@ else {
 				if (!empty($_REQUEST['rdata']) && Record::isRData($_REQUEST['rdata'], $filter['type']))
 					$filter['rdata'] = $_REQUEST['rdata'];
 			}
-			
+
 			$data = DBRecord::get($db, $filter);
 			$dateField = 'created';
 	}
 
 	foreach ($data as $row) {
-		switch (@$_REQUEST['data']) {
+		switch ($get[0]) {
 			case 'uris':
-				$output->add('', 'data', $row->host, $row);
+				$params = 'host=' . $row->host->toPunycode() . '&zone=' . $row->host->zone->name . '&type=URL&rdata=' . $row->uri;
+				$actions = '<a href="../delete.php?' . $params . '"><img alt="delete" src="../images/delete.png" /></a>';
+				$actions .= '<a href="../expert.php?' . $params . '&command=update"><img alt="edit" src="../images/edit.png" /></a>';
+
+				if ($output instanceof HtmlOutput) $output->add(get_class($row), 'data', $row->host, $row, $actions);
+				else $output->add(get_class($row), 'data', $row->host, $row);
 				break;
 			case 'hosts':
+				$params = 'host=' . $row->toPunycode() . '&zone=' . $row->zone->name;
+				$actions = '<a href="../delete.php?' . $params . '"><img alt="delete" src="../images/delete.png" /></a>';
+				$actions .= '<a href="../expert.php?' . $params . '&command=update"><img alt="edit" src="../images/edit.png" /></a>';
+
+				if ($output instanceof HtmlOutput) $output->add(get_class($row), 'data', $row, $actions);
+				else $output->add(get_class($row), 'data', $row);
+				break;
+			case 'records':
+				$params = 'host=' . $row->host->toPunycode() . '&zone=' . $row->host->zone->name . '&type=' . $row->type . '&class=' . $row->class . '&rdata=' . $row->rdata;
+				$actions = '<a href="../delete.php?' . $params . '"><img alt="delete" src="../images/delete.png" /></a>';
+				$actions .= '<a href="../expert.php?' . $params . '&command=update"><img alt="edit" src="../images/edit.png" /></a>';
+
+				if ($output instanceof HtmlOutput) $output->add(get_class($row), 'data', $row, $actions);
+				else $output->add(get_class($row), 'data', $row);
+				break;
 			case 'logs':
 			case 'queries':
-			case 'records':
 			default:
-				$output->add('', 'data', $row);
+				$output->add('data', 'data', $row);
 		}
 	}
 }

@@ -2,7 +2,7 @@
 
 function isAuthentificated() {
 	$config = Registry::get('config');
-	$htpasswd = file('../.htpasswd');
+	$htpasswd = file('/var/www/nulll/.htpasswd');
 
 	foreach ($htpasswd as $line) {
 		list($user, $crypt) = explode(':', $line);

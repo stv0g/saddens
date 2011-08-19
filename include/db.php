@@ -64,15 +64,15 @@ abstract class DBResultSet implements Iterator {
 	public function valid() {
 		return (bool) is_array($this->current());
 	}
-	
+
 	public function first() {
 		return (isset($this->_rows[0])) ? $this->_rows[0] : null;
 	}
-	
+
 	public function last() {
 		return $this->_rows[$this->_num_rows - 1];
 	}
-	
+
 	public function count() {
 		return $this->_num_rows;
 	}

@@ -1,5 +1,21 @@
 <?php
 
+class JsonOutput extends Output {
+	public function __construct($debug) {
+		parent::__construct('application/json', 'UTF-8', $debug);
+	}
+
+	protected function getOutput() {
+		return json_encode($this->getMessages());
+
+		$json = array();
+
+		foreach ($this->getMessages() as $index => $message) {
+
+		}
+	}
+}
+
 class XmlOutput extends Output {
 	public function __construct($debug) {
 		parent::__construct('text/xml', 'UTF-8', $debug);
@@ -327,6 +343,9 @@ abstract class Output {
 				return new GifOutput();
 				break;
 
+			case 'json':
+				return new JsonOutput($debug);
+
 			case 'html':
 			case 'php':
 			default:
@@ -339,7 +358,7 @@ abstract class Output {
 		global $argc;
 
 		$site = Registry::get('site');
-	
+
 		if (isset($forced))
 			$format = $forced;
 		elseif (isset($argc))

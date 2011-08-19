@@ -2,7 +2,7 @@
 
 class Zone extends NameServer implements Object {
 	public $name;
-	public $key;
+	private $key;
 
 	function __construct($nserver, $name, $key, $nsport = 53) {
 		parent::__construct($nserver, $nsport);
@@ -42,7 +42,7 @@ class Zone extends NameServer implements Object {
 				LEFT JOIN ' . $config['db']['tbl']['hosts'] . ' AS h
 				ON h.id = u.host_id
 				WHERE
-					((u.last_accessed + INTERVAL u.lifetime SECOND) < NOW()&&
+					((u.last_accessed + INTERVAL u.lifetime SECOND) < NOW() &&
 					h.zone = \'' . $db->escape($this->name) . '\') || h.id IS NULL';
 
 		$db->execute($sql);

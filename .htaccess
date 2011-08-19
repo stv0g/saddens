@@ -1,9 +1,9 @@
 RewriteEngine on
 
-RewriteCond %{REQUEST_FILENAME} (/(?:add|delete|update|ip))\.(xml|html|gif|txt|csv) [OR]
-RewriteCond %{REQUEST_FILENAME} (/admin/(?:cleanup|sync|parse))\.(xml|html|gif|txt|csv) [OR]
-RewriteCond %{REQUEST_FILENAME} (/admin/get)\.(xml|html|gif|txt|csv|png) [OR]
-RewriteCond %{REQUEST_FILENAME} (/admin/stats/types)\.(xml|html|gif|txt|csv|png)
+RewriteCond %{REQUEST_FILENAME} (/(?:add|delete|update|ip))\.(xml|html|gif|txt|csv|json) [OR]
+RewriteCond %{REQUEST_FILENAME} (/admin/(?:cleanup|sync|parse))\.(xml|html|gif|txt|csv|json) [OR]
+RewriteCond %{REQUEST_FILENAME} (/admin/get)\.(xml|html|gif|txt|csv|png|json) [OR]
+RewriteCond %{REQUEST_FILENAME} (/admin/stats/types)\.(xml|html|gif|txt|csv|png|json)
 RewriteRule .* %1.php?format=%2 [QSA]
 
 RewriteCond %{QUERY_STRING} !zone=(0l.de|d.eta.li)

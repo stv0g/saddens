@@ -42,11 +42,11 @@ class MySql extends Database {
 		$this->connect($host, $user, $pw);
 		$this->select($db);
 	}
- 
+
 	function __destruct() {
 		$this->close();
 	}
- 
+
 	/**
 	 * @brief create database connection
 	 * @param string $host IP or domain of the database host
@@ -60,7 +60,7 @@ class MySql extends Database {
 			error_reporting($__er);
 			throw new MySqlException();
 		}
-			
+
 		error_reporting($__er);
 	}
 
@@ -90,6 +90,8 @@ class MySql extends Database {
 	 * @return mixed
 	 */
 	public function execute($sql) {
+		if ($output = Registry::get('output')) $output->add('db query', 'debug', 8, $sql);
+
 		if (!($result = mysql_unbuffered_query($sql, $this->resource)))
 			throw new MySqlException();
 		return $result;
@@ -107,7 +109,7 @@ class MySql extends Database {
 			$sql .= sprintf(' LIMIT %d, %d', $offset, $limit);
 		return new MySqlResult($this->execute($sql));
 	}
-	
+
 	/**
 	 * @brief mysql escape
 	 * @param string $sql query
@@ -115,11 +117,11 @@ class MySql extends Database {
 	public function escape($sql) {
 		return mysql_real_escape_string($sql, $this->resource);
 	}
-	
+
 	public function lastId() {
 		return mysql_insert_id($this->resource);
 	}
-	
+
 	public function affectedRows() {
 		return mysql_affected_rows($this->resource);
 	}
