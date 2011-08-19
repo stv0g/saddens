@@ -26,9 +26,10 @@ $output = Output::start('html');
     <dd><input style="width:217px" tabindex="2" value="<?php echo isset($_REQUEST['rdata']) ? $_REQUEST['rdata'] : $_SERVER['REMOTE_ADDR']; ?>" type="text" name="rdata" /></dd>
 
 <?php
-if (!isAuthentificated())
+if (!isAuthentificated()) {
 	echo '<dt><label for="pw">Password</label></dt>
 		<dd><input style="width:217px" tabindex="3" type="password" name="pw" /></dd>';
+}
 ?>
 
   </dl>

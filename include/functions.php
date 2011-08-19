@@ -2,16 +2,18 @@
 
 function isAuthentificated() {
 	$config = Registry::get('config');
-	
-	$combi = @$_SERVER['PHP_AUTH_USER'] . ':{SHA}' . base64_encode(sha1(@$_SERVER['PHP_AUTH_PW'], TRUE));
-	$htpasswd = file('/var/www/nulll/sddns/../.htpasswd');
-	
-	foreach ($htpasswd as $user) {
-		if ($combi == trim($user)) {
+	$htpasswd = file('../.htpasswd');
+
+	foreach ($htpasswd as $line) {
+		list($user, $crypt) = explode(':', $line);
+		$salt = substr($crypt, 0, 2);
+
+		if ($user == @$_SERVER['PHP_AUTH_USER'] &&
+			trim($crypt) == crypt(@$_SERVER['PHP_AUTH_PW'], $salt)) {
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
@@ -27,12 +29,12 @@ function randomString($length, $characters='abcdefghijklmnopqrstuvwxyz0123456789
 
 function backtrace2xml($traces, DomDocument $doc) {
 	$xmlTraces = $doc->createElement('backtrace');
-	
+
 	foreach ($traces as $step => $trace) {
 		$xmlTrace = $doc->createElement('trace');
 		$xmlTraces->appendChild($xmlTrace);
 		$xmlTrace->setAttribute('step', $step);
-		
+
 		foreach ($trace as $key => $value) {
 			switch ($key) {
 				case 'function':
@@ -52,21 +54,21 @@ function backtrace2xml($traces, DomDocument $doc) {
 			}
 		}
 	}
-	
+
 	return $xmlTraces;
 }
 
 function backtrace2html($traces) {
 	$trace = '';
 
-	foreach(debug_backtrace() as $i=>$l){
+	foreach(debug_backtrace() as $i => $l){
 		$trace .= '[' . $i . '] in function <b>' . $l['class'] . $l['type'] . $l['function'] . '</b>';
 		if($l['file'])
 			$trace .= ' in <b>' . $l['file'] . '</b>';
 		if($l['line'])
 			$trace .= ' on line <b>' . $l['line'] . '</b>';
 	}
-	
+
 	return $trace;
 }
 
