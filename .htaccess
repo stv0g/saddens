@@ -6,13 +6,13 @@ RewriteCond %{REQUEST_FILENAME} (/admin/get)\.(xml|html|gif|txt|csv|png|json) [O
 RewriteCond %{REQUEST_FILENAME} (/admin/stats/types)\.(xml|html|gif|txt|csv|png|json)
 RewriteRule .* %1.php?format=%2 [QSA]
 
-RewriteCond %{QUERY_STRING} !zone=(0l.de|d.eta.li)
-RewriteCond %{HTTP_HOST} (0l.de|d.eta.li)$ [NC]
+RewriteCond %{QUERY_STRING}	!zone=(0l.de)
+RewriteCond %{HTTP_HOST}	(0l.de)$ [NC]
 RewriteRule (.*)(\?)? $1?zone=%1 [QSA]
 
 RewriteCond %{QUERY_STRING} !host=[a-z0-9.-]+
-RewriteCond %{HTTP_HOST} !^(d|dns|sddns|u|url)\.(0l.de|d.eta.li)$ [NC]
-RewriteCond %{HTTP_HOST} ([a-z0-9.-]+)\.(0l.de|d.eta.li)$ [NC]
+RewriteCond %{HTTP_HOST} !^(d|dns|sddns|u|url)\.(0l.de)$ [NC]
+RewriteCond %{HTTP_HOST} ([a-z0-9.-]+)\.(0l.de)$ [NC]
 RewriteRule (.*) $1?host=%1 [QSA]
 
 ExpiresActive Off
