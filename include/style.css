@@ -16,20 +16,25 @@ h3 {
 	margin-top: 5px;
 	margin-bottom: 5px;
 }
+
 dl {
   width: 300px;
   margin: auto;
 }
+
 dt {
   float: left;
 }
+
 dt a {
   color: #555
 }
+
 dd {
   text-align: right;
   padding-bottom: 4px
 }
+
 hr {
 	border: 1px solid #000000;
 	height: 1px;
@@ -45,6 +50,15 @@ td, th {
 	border: 1px solid grey;
 }
 
+th.index,
+th.type {
+	width: 40px;
+}
+
+th.time {
+	width: 170px;
+}
+
 a img {
 	border: 0px;
 }
@@ -57,8 +71,9 @@ iframe {
 
 #messages {
 	width: 100%;
-	padding: 0px;
-	margin: 1px 1px 1px 1px;
+	padding: 0;
+	margin: 0;
+	position: absolute;
 }
 
 #content {

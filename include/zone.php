@@ -29,25 +29,30 @@ class Zone extends NameServer implements Object {
 		$sql = 'DELETE r FROM ' . $config['db']['tbl']['records'] . ' AS r
 				LEFT JOIN ' . $config['db']['tbl']['hosts'] . ' AS h
 				ON h.id = r.host_id
-				WHERE
-					((r.last_accessed +  INTERVAL r.lifetime SECOND) < NOW() &&
-					h.zone = \'' . $db->escape($this->name) . '\') || h.id IS NULL';
+				WHERE (
+						(r.last_accessed +  INTERVAL r.lifetime SECOND) < NOW()
+						&& h.zone = \'' . $db->escape($this->name) . '\'
+						&& r.lifetime != 0
+					) || h.id IS NULL';
 
 		$db->execute($sql);
-		if ($db->affectedRows() > 0)
+		if ($db->affectedRows() > 0) {
 			$output->add('records deleted from db', 'success', $db->affectedRows(), $this);
+		}
 
 		// expired urls & uris without host
 		$sql = 'DELETE u FROM ' . $config['db']['tbl']['uris'] . ' AS u
 				LEFT JOIN ' . $config['db']['tbl']['hosts'] . ' AS h
 				ON h.id = u.host_id
-				WHERE
-					((u.last_accessed + INTERVAL u.lifetime SECOND) < NOW() &&
-					h.zone = \'' . $db->escape($this->name) . '\') || h.id IS NULL';
+				WHERE (
+						(u.last_accessed + INTERVAL u.lifetime SECOND) < NOW()
+						&& h.zone = \'' . $db->escape($this->name) . '\'
+						&& u.lifetime != 0
+					) || h.id IS NULL';
 
-		$db->execute($sql);
-		if ($db->affectedRows() > 0)
+		if ($db->affectedRows() > 0) {
 			$output->add('urls deleted from db', 'success', $db->affectedRows(), $this);
+		}
 
 		// hosts without records or url
 		$sql = 'DELETE h
@@ -61,8 +66,9 @@ class Zone extends NameServer implements Object {
 					h.zone = \'' . $db->escape($this->name) . '\'';
 
 		$db->execute($sql);
-		if ($db->affectedRows() > 0)
+		if ($db->affectedRows() > 0) {
 			$output->add('hosts deleted from db', 'success', $db->affectedRows(), $this);
+		}
 	}
 
 	public function sync(Database $db) {

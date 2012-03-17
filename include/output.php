@@ -189,6 +189,14 @@ class HtmlOutput extends Output {
 
 	protected function getOutput() {
 		$site = Registry::get('site');
+		$columnCount = 0;
+		$messages = $this->getMessages();
+		$html = ob_get_clean();
+
+		foreach ($messages as $message) {
+			if (count($message['data']) > $columnCount)
+			$columnCount = count($message['data']);
+		}
 
 		$str = '<?xml version="1.0" ?>
 <!DOCTYPE html>
@@ -204,16 +212,11 @@ class HtmlOutput extends Output {
 	</head>
 	<body>';
 
-		$maxDataCount = 0;
-		$messages = $this->getMessages();
-		foreach ($messages as $message) {
-			if (count($message['data']) > $maxDataCount)
-			$maxDataCount = count($message['data']);
-		}
+		$str .= '<div id="content">' . $html . '</div>';
 
 		if (count($messages)) {
-			$str .= '<table id="messages">
-						<tr><th>type</th><th>index</th><th>time</th><th>description</th><th colspan="100">data</th></tr>';
+			$str .= '<table id="messages" style="' . ((strlen($html)) ? 'bottom' : 'top') . ': 0">
+						<tr><th class="type">type</th><th class="index">index</th><th class="time">time</th><th>description</th><th colspan="100">data</th></tr>';
 
 			foreach ($messages as $index => $message) {
 				$str .= '<tr class="' . $message['type'] . '">
@@ -222,7 +225,7 @@ class HtmlOutput extends Output {
 						<td>' . date('Y-m-d H:i:s', $message['time']) . '</td>
 						<td>' . $message['description'] . '</td>';
 
-				for($i = 0; $i < $maxDataCount; $i++) {
+				for($i = 0; $i < $columnCount; $i++) {
 					$str .= '<td>';
 					if (isset($message['data'][$i])) {
 						$data = $message['data'][$i];
@@ -242,11 +245,7 @@ class HtmlOutput extends Output {
 			$str .= '</table>';
 		}
 
-		$str .= '<div id="content">';
-		$str .= ob_get_clean();
-		$str .=	'</div>
-			</body>
-		</html>';
+		$str .=	'</body></html>';
 
 		return $str;
 	}

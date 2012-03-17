@@ -9,7 +9,7 @@ $output = Output::start('html');
   <h1>Tiny DNS &amp; URL</h1>
 </header>
 
-<form name="formular" target="ifr" action="add.php" method="post" onsubmit="submit_simple(this);">
+<form name="formular" action="add.html" method="post" onsubmit="submit_simple(this);">
   <dl>
     <dt><label for="host"><a href="http://de.wikipedia.org/wiki/Domain">Domain</a></label></dt>
     <dd>
@@ -37,8 +37,6 @@ if (!isAuthentificated()) {
   <input type="submit" tabindex="4" value="register" />
   <input type="hidden" name="type" value="A" />
 </form>
-
-<iframe name="ifr" id="ifr"></iframe>
 
 <footer>
   <p>by <a href="http://www.steffenvogel.de">Steffen Vogel</a> - <a href="expert">expert mode</a> - <a href="http://0l.de/projects/sddns/usage">usage help</a> - <a href="javascript:installSearchEngine('<?php echo $site['url']; ?>/opensearch.xml');">searchplugin</a></p>

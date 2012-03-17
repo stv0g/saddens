@@ -10,15 +10,23 @@ if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 	$host = (empty($_REQUEST['host'])) ? Host::unique($zone, $db) : new Host($_REQUEST['host'], $zone);
 	$pw = (empty($_REQUEST['pw'])) ? randomString(8) : $_REQUEST['pw'];
 
-	if (empty($_REQUEST['lifetime']) || !is_int($_REQUEST['lifetime'])) {
-		$lifetime = $config['sddns']['std']['lifetime'];
-	}
-	else {
+	if (isset($_REQUEST['lifetime']) && is_numeric($_REQUEST['lifetime'])) {
 		$lifetime = (int) $_REQUEST['lifetime'];
 	}
+	else {
+		$lifetime = $config['sddns']['std']['lifetime'];
+	}
 
-	if (($lifetime > $config['sddns']['max_lifetime'] && !isAuthentificated()) || $lifetime < 0) {
+	if ($lifetime < 0) {
 		$output->add('invalid lifetime', 'error', $lifetime);
+		$output->send();
+		die();
+	}
+
+	if (($lifetime > $config['sddns']['max_lifetime'] || $lifetime == 0) && !isAuthentificated()) {
+		$output->add('lifetime exceeds limit', 'error');
+		$output->send();
+		die();
 	}
 
 	if ($host->isRegistred($db)) {
@@ -41,8 +49,9 @@ if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 		$host = $host->add($pw, $db);	// returns new DBHost
 		$output->add('host added to db' ,'notice', $host);
 
-		if (empty($_REQUEST['pw']))
+		if (empty($_REQUEST['pw'])) {
 			$output->add('generated password' ,'notice', $pw);
+		}
 	}
 
 	if ($type != 'URL') {	// pseudo type to create url redirection

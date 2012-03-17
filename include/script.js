@@ -29,18 +29,6 @@ function fade(elm) {
 	}
 }
 
-function slide_iframe(elm, currheight, maxheight, addheight) {
-	var newheight = currheight + addheight;
-  
-	elm.style.height = newheight + "px";
-  
-	if (newheight < maxheight) {
-		window.setTimeout(function() {
-			slide_iframe(elm, newheight, maxheight, addheight);
-		}, 30);
-	}
-}
-
 function installSearchEngine(openSearchXml) {
 	if (window.external && ("AddSearchProvider" in window.external)) {
 		window.external.AddSearchProvider(openSearchXml);
@@ -68,16 +56,6 @@ document.onmousemove = function() {
 			if (elm) {
 				fade(elm);
 			}
-		}
-	}
-}
-
-window.onload = function () {
-	var ifr = parent.document.getElementById('ifr');
-	if (ifr) {
-		var msgs = parent.frames.ifr.document.getElementById('messages');
-		if (msgs) {
-			slide_iframe(ifr, 0, msgs.clientHeight, 5)
 		}
 	}
 }
