@@ -3,11 +3,12 @@
 require_once 'include/init.php';
 $output = Output::start('html');
 
-if (!isAuthentificated()) {
-    header('WWW-Authenticate: Basic realm="Administration area"');
-    header('HTTP/1.0 401 Unauthorized');
 
-echo '<h1>Authorization Required</h1>
+if (!isAuthentificated()) {
+	header('WWW-Authenticate: Basic realm="Administration area"');
+	header('HTTP/1.0 401 Unauthorized');
+
+	echo '<h1>Authorization Required</h1>
 <p>This server could not verify that you
 are authorized to access the document
 requested.  Either you supplied the wrong
@@ -16,10 +17,14 @@ browser doesn\'t understand how to supply
 the credentials required.</p>
 <hr>
 <address>' . $_SERVER['SERVER_SIGNATURE'] . '</address>';
+
+	$output->add('authentification failed', 'error', 'user', @$_SERVER['PHP_AUTH_USER']);
 } else {
-   $output->add('authentificated as', 'notice', $_SERVER['PHP_AUTH_USER']);
+	echo '<script language="javascript">window.setTimeout(function(){ window.location="/expert"; }, 3000);</script>';
+
+	$output->add('authentificated as', 'notice', $_SERVER['PHP_AUTH_USER']);
 }
 
-$output->send()
+$output->send();
 
 ?>
