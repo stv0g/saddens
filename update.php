@@ -15,8 +15,11 @@ $offline = $_REQUEST['offline'];	// unused!*/
 if (!empty($_REQUEST['pw'])) {
 	$pw = $_REQUEST['pw'];
 }
-elseif (!empty($_SERVER['PHP_AUTH_PW'])) {
+/*elseif (!empty($_SERVER['PHP_AUTH_PW'])) {
 	$pw = $_SERVER['PHP_AUTH_PW'];
+}*/
+else {
+	$pw = false;
 }
 
 // host & zone
@@ -24,14 +27,14 @@ if (!empty($_REQUEST['hostname'])) {
 	foreach ($config['sddns']['zones'] as $z) {
 		if (substr($_REQUEST['hostname'], -strlen($z->name)) === $z->name) {
 			$zone = $z;
-			$host = reset(DBHost::get($db, array('host' => substr($_REQUEST['hostname'], 0, -(strlen($zone->name)+1)), 'zone' => $zone)));
+			list($host) = DBHost::get($db, array('host' => substr($_REQUEST['hostname'], 0, -(strlen($zone->name)+1)), 'zone' => $zone));
 		}
 	}
 }
 elseif (!empty($_REQUEST['host'])) {
 	if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 		$zone = $config['sddns']['zones'][$_REQUEST['zone']];
-		$host = reset(DBHost::get($db, array('host' => $_REQUEST['host'], 'zone' => $zone)));
+		list($host) = DBHost::get($db, array('host' => $_REQUEST['host'], 'zone' => $zone));
 	}
 }
 
@@ -60,18 +63,33 @@ else {
 
 if (!empty($zone)) {
 	if (!empty($host)) {
-		$records = DBRecord::get($db, array('host' => $host, 'zone' => $zone, 'class' => @$class, 'type' => @$type));
-		if (count($records) > 0) {
-			$output->add('found host', 'success', $host);
-			if ($host->checkPassword($pw) || isAuthentificated()) {
-				$records[0]->setRData($rdata);
-				$records[0]->lastAccessed = time();
-				$records[0]->update();
-				$output->add('record updated in db', 'success', $records[0]);
+		if ($type == 'URL') {
+			$entries = DBUri::get($db, array('host' => $host, 'zone' => $zone));
+		}
+		else {
+			$entries = DBRecord::get($db, array('host' => $host, 'zone' => $zone, 'class' => @$class, 'type' => @$type));
+		}
 
-				for ($i = 1; $i < count($records); $i++) {
+		if (count($entries) > 0) {
+			$output->add('found host', 'success', $host);
+
+			if (isAuthentificated() || $host->checkPassword($pw)) {
+				if ($type == 'URL') {
+					if (isset($_REQUEST['frame'])) $entries[0]->frame = $_REQUEST['frame'];
+
+					$entries[0]->setUri($rdata);
+				}
+				else {
+					$entries[0]->setRData($rdata);
+				}
+				$entries[0]->lastAccessed = time();
+				$entries[0]->update();
+
+				$output->add('entry updated in db', 'success', $entries[0]);
+
+				for ($i = 1; $i < count($entries); $i++) {
 					$records[$i]->delete();
-					$output->add('record deleted from db', 'warning', $records[$i]);
+					$output->add('record deleted from db', 'warning', $entries[$i]);
 				}
 
 				$zone->cleanup($db);
@@ -82,7 +100,7 @@ if (!empty($zone)) {
 			}
 		}
 		else {
-			$output->add('no records found to update', 'warning');
+			$output->add('nothing found to update', 'warning');
 		}
 	}
 	else {
