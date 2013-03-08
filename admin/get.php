@@ -168,7 +168,7 @@ else {
 				}
 			}
 
-			$data = DBUri::get($db, $filter);
+			$data = DBUri::get($db, $filter, array('last_accessed' => 'DESC'));
 			$dateField = 'created';
 			break;
 
@@ -193,7 +193,7 @@ else {
 					$filter['rdata'] = $_REQUEST['rdata'];
 			}
 
-			$data = DBRecord::get($db, $filter);
+			$data = DBRecord::get($db, $filter, array('last_accessed' => 'DESC'));
 			$dateField = 'created';
 	}
 

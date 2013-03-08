@@ -5,7 +5,7 @@ class DBUri extends Uri implements DBObject {
 	public $lifetime;
 	public $lastAccessed;
 	public $accessed;
-	
+
 	private $db;
 
 	public function __construct($id, Database $db) {
@@ -29,14 +29,14 @@ class DBUri extends Uri implements DBObject {
 
 		parent::__construct($uri['uri'], $this->host);
 	}
-	
+
 	public function __destruct() {
 		//$this->update();
 	}
-	
+
 	public function update() {
 		$config = Registry::get('config');
-		
+
 		$sql = 'UPDATE ' . $config['db']['tbl']['uris'] . '
 				SET
 					host_id = ' . (int) $this->host->id . ',
@@ -46,18 +46,18 @@ class DBUri extends Uri implements DBObject {
 					last_accessed = \'' . date('Y-m-d H:i:s', $this->lastAccessed) . '\',
 					lifetime = ' . (int) $this->lifetime . '
 				WHERE id = ' . (int) $this->id;
-				
+
 		$this->db->execute($sql);
 	}
-	
+
 	public function toXml(DOMDocument $doc) {
 		$xmlUri = parent::toXml($doc);
 
 		$xmlUri->setAttribute('id', $this->id);
-		
+
 		$xmlUri->appendChild($doc->createElement('lifetime', $this->lifetime));
 		$xmlUri->appendChild($doc->createElement('lastaccessed', $this->lastAccessed));
-		
+
 		return $xmlUri;
 	}
 
@@ -66,11 +66,11 @@ class DBUri extends Uri implements DBObject {
 
 		$sql = 'DELETE FROM ' . $config['db']['tbl']['uris'] . '
 				WHERE id = ' . (int) $this->id;
-		
+
 		$this->db->execute($sql);
 	}
-	
-	public static function get(Database $db, $filter = false) {
+
+	public static function get(Database $db, $filter = false, $order = array()) {
 		$config = Registry::get('config');
 
 		$sql = 'SELECT u.id
@@ -78,7 +78,7 @@ class DBUri extends Uri implements DBObject {
 				LEFT JOIN ' .  $config['db']['tbl']['hosts'] . ' AS h
 				ON h.id = u.host_id
 				WHERE true';
-				
+
 				if (!empty($filter['id']))
 					$sql .= ' && id = ' . (int) $filter['id'];
 				if (!empty($filter['host']) && $filter['host'] instanceof Host)
@@ -94,9 +94,15 @@ class DBUri extends Uri implements DBObject {
 				if (!empty($filter['uri']))
 					$sql .= ' && uri = \'' . $filter['uri'] . '\'';
 
-		$sql .= ' ORDER BY u.id ASC';
+
+		$sql .= ' ORDER BY';
+		foreach ($order as $column => $dir) {
+			$sql .= ' ' . $column . ' ' . $dir . ',';
+		}
+		$sql .= ' u.id ASC';
+
 		$result = $db->query($sql);
-		
+
 		$uris = array();
 		foreach ($result as $uri) {
 			$uris[] = new self($uri['id'], $db);

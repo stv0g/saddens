@@ -68,7 +68,7 @@ class DBRecord extends Record implements DBObject {
 		$this->db->execute($sql);
 	}
 
-	public static function get(Database $db, $filter = false) {
+	public static function get(Database $db, $filter = false, $order = array()) {
 		$config = Registry::get('config');
 
 		$sql = 'SELECT r.id
@@ -98,7 +98,11 @@ class DBRecord extends Record implements DBObject {
 				if (!empty($filter['ttl']))
 					$sql .= ' && ttl = ' . (int) $filter['ttl'];
 
-		$sql .= ' ORDER BY r.id ASC';
+                $sql .= ' ORDER BY';
+		foreach ($order as $column => $dir) {
+			$sql .= ' ' . $column . ' ' . $dir . ',';
+		}
+		$sql .= ' r.id ASC';
 
 		$result = $db->query($sql);
 
