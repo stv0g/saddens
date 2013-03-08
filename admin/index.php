@@ -20,16 +20,15 @@ if (isAuthentificated()) {
 
 <ul>
 	<li><a href="cleanup">cleanup</a></li>
-	<li><a href="get">get</a></li>
+	<li>get: <a href="get?data=hosts">hosts</a>, <a href="get?data=records">records</a>, <a href="get?data=uris">uris</a>, <a href="get?data=logs">logs</a>, <a href="get?data=queries">queries</a></li>
 	<li><a href="parse">parse</a></li>
 	<li><a href="sync">sync</a></li>
 </ul>
 
 <hr />
-<a href="../expert">expert mode</a> - 
-<?php if (isAuthentificated()) echo '<a href="admin/">admin</a> - '; ?>
+<a href="/expert">expert mode</a> - 
 <a href="http://0l.de/projects/sddns/usage">usage</a> - 
-<a href="http://0l.de/projects/sddns/">wiki</a> - 
+<a href="http://0l.de/projects/sddns">wiki</a> - 
 <a href="javascript:u='http://d.0l.de/add.html?type=URL&rdata='+encodeURIComponent(location.href);h=encodeURIComponent(window.getSelection().toString().replace(/[\s\x21\x22\x23$
 <a href="javascript:installSearchEngine('<?php echo $site['url']; ?>/opensearch.xml');">search plugin</a>
 <address><?php echo $_SERVER['SERVER_SIGNATURE']; ?></address>
