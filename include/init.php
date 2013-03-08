@@ -29,7 +29,7 @@ require_once $site['path']['server'] . '/include/config.php';
 Registry::set('config', $config);
 
 // get relevant runtime information
-$site['hostname'] = @$_SERVER[ 'SERVER_NAME'];
+$site['hostname'] = @$_SERVER['SERVER_NAME'];
 $site['path']['web'] = $config['path']['web'];
 $site['url'] = 'http://' . $site['hostname'] . $site['path']['web'];
 

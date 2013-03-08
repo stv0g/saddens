@@ -51,7 +51,7 @@ class Zone extends NameServer implements Object {
 					) || h.id IS NULL';
 
 		if ($db->affectedRows() > 0) {
-			$output->add('urls deleted from db', 'success', $db->affectedRows(), $this);
+			$output->add('uris deleted from db', 'success', $db->affectedRows(), $this);
 		}
 
 		// hosts without records or url
@@ -91,6 +91,7 @@ class Zone extends NameServer implements Object {
 	}
 
 	public function add(Record $record) {
+		global $output;
 		$config = Registry::get('config');
 
 		if ($record->host->zone->name != $this->name) {
@@ -100,7 +101,7 @@ class Zone extends NameServer implements Object {
 		parent::add($record);
 		$nsresult = $this->sendQueue();
 
-		if($nsresult['code'] != 0) {
+		if ($nsresult['code'] != 0) {
 			throw new NameServerException('error during nameserver update: ' . $nsresult['stderr']);
 		}
 

@@ -90,10 +90,12 @@ class MySql extends Database {
 	 * @return mixed
 	 */
 	public function execute($sql) {
-		if ($output = Registry::get('output')) $output->add('db query', 'debug', 8, $sql);
+		if ($output = Registry::get('output'))
+			$output->add('db query', 'debug', 8, $sql);
 
 		if (!($result = mysql_unbuffered_query($sql, $this->resource)))
 			throw new MySqlException();
+
 		return $result;
 	}
 

@@ -1,9 +1,9 @@
 <?php
 
 class Uri implements Object {
-	
+
 	public $uri, $host, $frame;
-	
+
 	/*
 	 * Constructor
 	 */
@@ -11,7 +11,7 @@ class Uri implements Object {
 		$this->uri = $uri;
 		$this->host = $host;
 	}
-	
+
 	/*
 	 * Database
 	 */
@@ -27,37 +27,50 @@ class Uri implements Object {
 					NOW(),
 					NOW(),
 					\'' . $_SERVER['REMOTE_ADDR'] . '\')';
-		
+
 
 		$db->execute($sql);
-		
+
 		return new DBUri($db->lastId(), $db);
 	}
-	
+
 	/*
 	 * Checks
 	 */
 	 static function isValid($uri) {
 	 	 return true; // TODO
 	 }
-	
+
+	/*
+	 * Setter & Getter
+	 */
+	public function setUri($uri) {
+                if ($this->isValid($uri)) {
+			$this->uri = $uri;
+		}
+		else {
+			throw new ValidationException('Invalid uri: ' . $uri);
+		}
+	}
+
+
 	/*
 	 * Output
 	 */
 	public function __toString() {
 		return $this->uri;
 	}
-	
+
 	public function toHtml() {
 		return '<a target="_blank" href="' . $this . '">' . $this . '</a>';
 	}
-	
+
 	public function toXml(DOMDocument $doc) {
 		$xmlUri = $doc->createElement('uri');
-		
+
 		$xmlUri->appendChild($doc->createElement('uri', $this->uri));
 		$xmlUri->appendChild($this->host->toXml($doc));
-		
+
 		return $xmlUri;
 	}
 }

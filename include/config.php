@@ -1,5 +1,6 @@
 <?php
 
+$config['htpasswd'] = '/var/www/nulll/.htpasswd';
 $config['path']['web'] = '';
 
 $config['db']['host'] = 'localhost';
@@ -15,7 +16,7 @@ $config['sddns']['htpasswd'] = $site['path']['server'] . '/../.htpasswd';
 
 $key = array('hmac' => 'gDlXSZtESw78I47O68UEigpPofn0XbpSpo5Vba+9IY38EYagPO/2C2Ch lZL+AvtN/ozRdra+p3+wLOKvVvqdrA==', 'name' => 'info.steffenvogel.de.');
 $zones = array('0l.de');
-$config['sddns']['ns']['hostname'] = 'ns0.0l.de';
+$config['sddns']['ns']['hostname'] = 'localhost';
 $config['sddns']['ns']['port'] = 53;
 
 foreach ($zones as $zone) {

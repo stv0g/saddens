@@ -102,6 +102,11 @@ class Record implements Object {
 				$valid = Host::isValid($rdata);
 				break;
 
+			case 'MX':
+				@list($priority, $hostname) = explode($rdata, ' ');
+				$valid = (is_numeric($priority) && Host::isValid($hostname));
+				break;
+
 			case 'URL':
 				$valid = Uri::isValid($rdata);
 
@@ -189,7 +194,7 @@ class Record implements Object {
 			break;
 		}
 
-		return $html; 
+		return $html;
 	}
 }
 

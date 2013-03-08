@@ -1,7 +1,7 @@
 <?php
 
 class Host implements Object {
-	private $punycode;
+	public $punycode;
 	public $zone;
 	public $generated;
 

@@ -12,7 +12,7 @@ class CustomException extends Exception {
 		$xmlRecord->appendChild($doc->createElement('message', $this->message));
 		$xmlRecord->appendChild($doc->createElement('line', $this->line));
 		$xmlRecord->appendChild($doc->createElement('file', $this->file));
-		
+
 		$xmlRecord->appendChild(backtrace2xml($this->getTrace(), $doc)); 
 
 		return $xmlRecord;

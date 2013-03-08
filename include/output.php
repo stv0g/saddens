@@ -6,12 +6,19 @@ class JsonOutput extends Output {
 	}
 
 	protected function getOutput() {
-		return json_encode($this->getMessages());
-
 		$json = array();
 
 		foreach ($this->getMessages() as $index => $message) {
+			array_push($json, $message);
+		}
 
+
+		// JSONP
+		if (!empty($_REQUEST['callback'])) {
+			return $_REQUEST['callback'] . '(' . json_encode($json) . ');';
+		}
+		else {
+			return json_encode($json);
 		}
 	}
 }
@@ -31,8 +38,9 @@ class XmlOutput extends Output {
 			$xmlMessage = $doc->createElement('message');
 			$xmlMessage->setAttribute('type', $message['type']);
 
-			if ($message['type'] == 'debug')
-			$xmlMessage->setAttribute('level', $message['level']);
+			if ($message['type'] == 'debug') {
+				$xmlMessage->setAttribute('level', $message['level']);
+			}
 
 			$xmlMessage->appendChild($doc->createElement('description', $message['description']));
 
@@ -210,7 +218,8 @@ class HtmlOutput extends Output {
 		<link rel="icon" href="/favicon.png" type="image/png" />
 		<link rel="search" type="application/opensearchdescription+xml" title="Tiny DNS &amp; URL" href="' . $site['path']['web'] . '/opensearch.xml" />
 	</head>
-	<body>';
+	<body>
+		<div id="wrapper">';
 
 		$str .= '<div id="content">' . $html . '</div>';
 
@@ -220,16 +229,16 @@ class HtmlOutput extends Output {
 
 			foreach ($messages as $index => $message) {
 				$str .= '<tr class="' . $message['type'] . '">
-						<td><img alt="' . $message['type'] . '" src="' . $site['path']['web'] . '/images/' . $message['type'] . '.png" title="' . @$message['level'] . '" /></td>
+						<td><img alt="' . $message['type'] . '" title="' . $message['type'] . '" src="' . $site['path']['web'] . '/images/' . $message['type'] . '.png" title="' . @$message['level'] . '" /></td>
 						<td>#' . $index . '</td>
-						<td>' . date('Y-m-d H:i:s', $message['time']) . '</td>
+						<td>' . date('Y-m-d H:i', $message['time']) . '</td>
 						<td>' . $message['description'] . '</td>';
 
 				for($i = 0; $i < $columnCount; $i++) {
 					$str .= '<td>';
 					if (isset($message['data'][$i])) {
 						$data = $message['data'][$i];
-						if (method_exists($data, 'toHtml')) {
+						if (is_object($data) && method_exists($data, 'toHtml')) {
 							$str .= $data->toHtml();
 						}
 						else {
@@ -245,7 +254,7 @@ class HtmlOutput extends Output {
 			$str .= '</table>';
 		}
 
-		$str .=	'</body></html>';
+		$str .=	'</div></body></html>';
 
 		return $str;
 	}
@@ -389,7 +398,9 @@ abstract class Output {
 	}
 
 	function exception_handler($exception) {
-		$this->add('unhandled ' . get_class($exception), 'exception', $exception);
+		$this->add('unhandled ' . get_class($exception), 'exception', (array) $exception);
+		$this->debug = 7; // increase verbosity in case of an exception
+		$this->send();
 	}
 
 	function error_handler($errno, $errstr, $errfile, $errline) {
