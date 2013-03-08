@@ -8,7 +8,7 @@ if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
 	$zone = $config['sddns']['zones'][$_REQUEST['zone']];
 
 	if (!empty($_REQUEST['host'])) {
-		if ($host = reset(DBHost::get($db, array('host' => $_REQUEST['host'], 'zone' => $zone)))) {
+		if (list($host) = DBHost::get($db, array('host' => $_REQUEST['host'], 'zone' => $zone))) {
 			if ($host->checkPassword($pw)  || isAuthentificated()) {
 				if (isset($_REQUEST['class']) && in_array($_REQUEST['class'], $config['sddns']['classes']))
 					$class = $_REQUEST['class'];
