@@ -1,0 +1,83 @@
+#!/bin/bash
+##
+ # SDDNS update script
+ #
+ # @copyright	2013 Steffen Vogel
+ # @license	http://www.gnu.org/licenses/gpl.txt GNU Public License
+ # @author	Steffen Vogel <post@steffenvogel.de>
+ # @link	http://www.steffenvogel.de
+ ##
+##
+ # This file is part of sddns
+ #
+ # sddns is free software: you can redistribute it and/or modify
+ # it under the terms of the GNU General Public License as published by
+ # the Free Software Foundation, either version 3 of the License, or
+ # any later version.
+ #
+ # sddns is distributed in the hope that it will be useful,
+ # but WITHOUT ANY WARRANTY; without even the implied warranty of
+ # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ # GNU General Public License for more details.
+ #
+ # You should have received a copy of the GNU General Public License
+ # along with sddns. If not, see <http://www.gnu.org/licenses/>.
+ ##
+
+################################################################################
+# Requirements
+#
+# This script requires bash, curl, dig
+#
+################################################################################
+# Settings
+
+# Password
+PW=Ohsongei6
+
+# Hostname
+HOST=sea
+
+# Zone
+ZONE=0l.de
+
+# Interface
+IF=eth0
+
+# Get ipv6 ip
+#IPV6=$(ip -6 -o addr show dev eth0 dynamic scope global | sed -r 's/\s+/\t/g' | cut -f4 | cut -f1 -d/)
+
+################################################################################
+# Expert settings
+
+# Time to live value in seconds for the record
+TTL=120
+
+# Type (A for IPv4, AAAA for IPv6)
+TYPE=AAAA
+
+################################################################################
+# Do not touch anything under this!
+
+RDATA=$(dig $TYPE $HOST.$ZONE @0l.de +short)
+
+#       2: eth0 inet6 2a02:908:f318:7201:52e5:49ff:feeb:740c/64 scope global dynamic valid_lft 7200sec preferred_lft 3600sec
+REGEX='^[0-9]+: +([^ ]+) +(inet6?) +([^/]+)/([0-9]+) +scope +global +dynamic +valid_lft +([0-9]+)sec +preferred_lft +([0-9]+)sec'
+
+ip -o monitor address | while read ACTION; do
+	if [[ ${ACTION} =~ ${REGEX} ]]; then
+		if [ "${RDATA}" != "${BASH_REMATCH[3]}" ]; then
+			WAIT=1
+			RDATA=${BASH_REMATCH[3]}
+			URL="http://d.0l.de/update.txt?host=$HOST&zone=$ZONE&ttl=$TTL&class=IN&type=$TYPE&rdata=$RDATA&pw=$PW"
+
+			echo "Updating record: $URL"
+			while [ $WAIT -lt 60 ] && ! curl "$URL" 2>/dev/null | sed 's/^/  /'; do
+				sleep $WAIT; # wait until interface is ready
+				WAIT=$(($WAIT*2))
+			done
+		else
+			echo "Address hasn't changed: ${RDATA}"
+		fi
+	fi
+done
