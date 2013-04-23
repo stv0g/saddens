@@ -12,13 +12,14 @@ $sql = 'SELECT *
 
 $result = $db->query($sql);
 
-$pattern = '/^queries: info: client ([.\d]+)#(\d+): query: ([+.-\w]+) ([A-Z]+) ([0-9A-Z]+) ([-+A-Z]+) \(([.\d]+)\)$/';
+$pattern = '/^queries: info: client ([:.0-9a-f]+)#(\d+): query: ([+.-\w]+) ([A-Z]+) ([0-9A-Z]+) ([-+A-Z]+) \(([:.0-9a-f]+)\)$/';
 $queries = array();
 $update = array();
 $delete = array();
+
 foreach ($result as $log) {
 	if (preg_match($pattern, $log['message'], $matches)) {
-		$query = array('ip' => new IpV4($matches[1]),
+		$query = array('ip' => (strpos($matches[1], ':') === FALSE) ? new IpV4($matches[1]) : new IpV6($matches[1]),
 				'port' => (int) $matches[2],
 				'hostname' => $matches[3],
 				'class' => $matches[4],
@@ -75,7 +76,13 @@ foreach ($update as $record) {
 
 	$output->add('record renewed', 'success', $record, date('Y-m-d H:m:s', $record->lastAccessed));
 }
-$output->add('renewed records', 'success', $updated);
+
+if ($updated > 0) {
+	$output->add('renewed records', 'success', $updated);
+}
+else {
+	$output->add('no records updated', 'warning');
+}
 
 $output->send();
 

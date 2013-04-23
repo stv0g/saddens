@@ -6,7 +6,7 @@ class IpV4 implements Object {
 	public function __construct($ipString) {
 		if (self::isValid($ipString)) {
 			$this->tuples = explode('.', $ipString);
-		}		
+		}
 		else {
 			throw new ValidationException('Invalid IP: ', $ipString);
 		}
