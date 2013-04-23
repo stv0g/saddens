@@ -1,4 +1,28 @@
 <?php
+/**
+ * Output classes
+ *
+ * @copyright	2013 Steffen Vogel
+ * @license	http://www.gnu.org/licenses/gpl.txt GNU Public License
+ * @author	Steffen Vogel <post@steffenvogel.de>
+ * @link	http://www.steffenvogel.de
+ */
+/*
+ * This file is part of sddns
+ *
+ * sddns is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * sddns is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with sddns. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 class JsonOutput extends Output {
 	public function __construct($debug) {
@@ -214,7 +238,7 @@ class HtmlOutput extends Output {
 		<script src="' . $site['path']['web'] . '/include/script.js" type="text/javascript"></script>
 		<link rel="stylesheet" type="text/css" href="' . $site['path']['web'] . '/include/style.css" />
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-		<link rel="shortcut icon" href="/favicon.png" type="image/png" />
+		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 		<link rel="icon" href="/favicon.png" type="image/png" />
 		<link rel="search" type="application/opensearchdescription+xml" title="Tiny DNS &amp; URL" href="' . $site['path']['web'] . '/opensearch.xml" />
 	</head>
