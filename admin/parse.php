@@ -56,12 +56,11 @@ foreach ($result as $log) {
 				'class' => $matches[4],
 				'type' => $matches[5],
 				'options' => $matches[6],
-				'log_id' => $log['id'],
 				'queried' => strtotime($log['logged']));
 
-		$db->execute('INSERT IGNORE INTO queries (ip, port, hostname, class, type, options, queried, log_id) VALUES (\'' . $query['ip'] . '\', ' . $query['port'] . ', \'' . $query['hostname'] . '\', \'' . $query['class'] . '\', \'' . $query['type'] . '\', \'' . $query['options'] . '\', \'' . date('Y-m-d H:i:s', $query['queried']) . '\', ' . $query['log_id'] . ')');
+		$db->execute('INSERT IGNORE INTO queries (ip, port, hostname, class, type, options, queried) VALUES (\'' . $query['ip'] . '\', ' . $query['port'] . ', \'' . $query['hostname'] . '\', \'' . $query['class'] . '\', \'' . $query['type'] . '\', \'' . $query['options'] . '\', \'' . date('Y-m-d H:i:s', $query['queried']) . ')');
 		$output->add('query parsed', 'debug', 3, $log['logged'], $log['message']);
-		array_push($delete, $query['log_id']);
+		array_push($delete, $log['id']);
 
 		foreach ($config['sddns']['zones'] as $zone) {
 			if (substr($query['hostname'], -strlen($zone->name)) == $zone->name && strlen($query['hostname']) > strlen($zone->name)) {
