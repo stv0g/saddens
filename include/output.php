@@ -198,20 +198,6 @@ class PlainLineOutput extends Output {
 	}
 }
 
-class DynDnsOutput extends Output {
-	public function __construct() {
-		parent::__construct('text/plain');
-
-		if (!isset($_SERVER['PHP_AUTH_PW']))
-		header('WWW-Authenticate: Basic realm="DynDNS API Access"');
-	}
-
-	protected function getOutput() {
-		$message = current($this->getMessages(false, array('error', 'success')));
-		return $message['description'];
-	}
-}
-
 class HtmlOutput extends Output {
 	public function __construct($debug) {
 		parent::__construct('text/html', 'UTF-8', $debug);
