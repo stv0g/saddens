@@ -37,7 +37,7 @@ if (isAuthentificated()) {
 ?>
 
 <div id="admin">
-<div style="float: right;"><a href="http://0l.de"><img src="../images/nulll_small.png" alt="/dev/nulll" /></a></div>
+<div style="float: right;"><a href="http://dev.0l.de"><img src="../images/nulll_small.png" alt="/dev/nulll" /></a></div>
 <h1>Tiny DNS & URL</h1>
 <h3>Administration interface</h3>
 <p>by <a href="http://www.steffenvogel.de">Steffen Vogel</a></p>
@@ -48,12 +48,13 @@ if (isAuthentificated()) {
 	<li>get: <a href="get?data=hosts">hosts</a>, <a href="get?data=records">records</a>, <a href="get?data=uris">uris</a>, <a href="get?data=logs">logs</a>, <a href="get?data=queries">queries</a></li>
 	<li><a href="parse">parse</a></li>
 	<li><a href="sync">sync</a></li>
+	<li>stats: <a href="stats/hosts.php">hosts</a>, <a href="stats/types.png">types</a></li>
 </ul>
 
 <hr />
 <a href="/expert">expert mode</a> - 
-<a href="http://0l.de/projects/sddns/usage">usage</a> - 
-<a href="http://0l.de/projects/sddns">wiki</a> - 
+<a href="http://dev.0l.de/projects/sddns/usage">usage</a> - 
+<a href="http://dev.0l.de/projects/sddns">wiki</a> - 
 <a href="javascript:u='http://d.0l.de/add.html?type=URL&rdata='+encodeURIComponent(location.href);h=encodeURIComponent(window.getSelection().toString().replace(/[\s\x21\x22\x23$
 <a href="javascript:installSearchEngine('<?php echo $site['url']; ?>/opensearch.xml');">search plugin</a>
 <address><?php echo $_SERVER['SERVER_SIGNATURE']; ?></address>

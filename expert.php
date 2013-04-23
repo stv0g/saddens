@@ -41,7 +41,7 @@ $checkedType = (isset($_REQUEST['type'])) ? $_REQUEST['type'] : $config['sddns']
 
 ?>
 <div id="expert">
-<div style="float: right;"><a href="http://0l.de"><img src="images/nulll_small.png" alt="/dev/nulll" /></a></div>
+<div style="float: right;"><a href="http://dev.0l.de"><img src="images/nulll_small.png" alt="/dev/nulll" /></a></div>
 <h1>Tiny DNS & URL</h1>
 <h3>Expert interface</h3>
 <p>by <a href="http://www.steffenvogel.de">Steffen Vogel</a></p>
@@ -119,8 +119,8 @@ $checkedType = (isset($_REQUEST['type'])) ? $_REQUEST['type'] : $config['sddns']
 <a href="/simple">simple mode</a> - 
 <?php if (isAuthentificated()) echo '<a href="/admin">admin</a> - '; ?>
 <?php if (!isAuthentificated()) echo '<a href="/login">login</a> - '; ?>
-<a href="http://0l.de/projects/sddns/usage">usage</a> - 
-<a href="http://0l.de/projects/sddns">wiki</a> - 
+<a href="http://dev.0l.de/projects/sddns/usage">usage</a> - 
+<a href="http://dev.0l.de/projects/sddns">wiki</a> - 
 <a href="javascript:u='http://d.0l.de/add.html?type=URL&rdata='+encodeURIComponent(location.href);h=encodeURIComponent(window.getSelection().toString().replace(/[\s\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2A\x2B\x2C\x2E\x2F\x3A\x3B\x3C\x3D\x3F\x40\x5B\x5C\x5D\x5E\x5F\x60\x7B\x7C\x7C\x7D\x7E]+/gi,'-').replace(/^\-+/,'').replace(/\-+$/,''));if(!h){h=prompt('Subdomain','');}if(h){u+='&host='+h;}location.href=u">bookmarklet</a> - 
 <a href="javascript:installSearchEngine('<?php echo $site['url']; ?>/opensearch.xml');">search plugin</a>
 <address><?php echo $_SERVER['SERVER_SIGNATURE']; ?></address>
