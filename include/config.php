@@ -28,8 +28,8 @@ $config['htpasswd'] = '/var/www/nulll/.htpasswd';
 $config['path']['web'] = '';
 
 $config['db']['host'] = 'localhost';
-$config['db']['user'] = 'sddns';
-$config['db']['pw'] = 'RjRXDa68hnS5A8mX';
+$config['db']['user'] = 'user';
+$config['db']['pw'] = 'password';
 $config['db']['db'] = 'sddns';
 $config['db']['tbl']['prefix'] = '';
 $config['db']['tbl']['records'] = $config['db']['tbl']['prefix'] . 'records';
@@ -61,4 +61,3 @@ $config['sddns']['std']['lifetime'] = 1 * 30 * 24 * 60 * 60;	// in seconds; 1 mo
 $config['sddns']['cmds'] = array('add', 'delete', 'update');	// available cmds
 $config['sddns']['formats'] = array('html', 'xml', 'gif', 'txt', 'csv', 'png', 'json');	// available formats (keep in sync with .htaccess!)
 $config['sddns']['blacklist'] = array_merge($zones, array('steffenvogel.de', 'griesm.de', 'vogel.cc', 'icann.org', 'isc.org'));
-
