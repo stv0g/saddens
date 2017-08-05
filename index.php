@@ -26,11 +26,13 @@
 
 require_once 'include/init.php';
 
-$filter = array('host' => @$_REQUEST['host'], 'zone' => @$_REQUEST['zone']);
-$uris = DBUri::get($db, $filter);
+$host = $_REQUEST['host'];
+$zone = $_REQUEST['zone'];
+
+$uris = DBUri::get($db, array('host' => $host, 'zone' => $zone));
 
 if (count($uris) == 1) {
-	$uri = $uris[0];
+	$uri = array_pop($uris);
 
 	$uri->accessed++;
 	$uri->lastAccessed = time();
@@ -38,7 +40,8 @@ if (count($uris) == 1) {
 
 	$fullUri = $uri->uri;
 
-	if ($_SERVER['REQUEST_URI'] != '/') {
+	$realHost = substr($_SERVER['HTTP_HOST'], 0 , -(strlen($zone)+1));
+	if (!in_array($realHost, array('s', 't')) && $_SERVER['REQUEST_URI'] != '/') {
 		$fullUri .= $_SERVER['REQUEST_URI'];
 	}
 
@@ -62,12 +65,10 @@ else {
 		$qs = '?' . $_SERVER['QUERY_STRING'];
 	}
 
-	if (!isAuthentificated()) {
-		header('Location: simple' . $qs);
+	if (isAuthentificated()) {
+		header('Location: /expert' . $qs);
 	}
 	else {
-		header('Location: expert' . $qs);
+		header('Location: /simple' . $qs);
 	}
 }
-
-?>

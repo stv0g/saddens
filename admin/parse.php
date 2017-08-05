@@ -36,7 +36,7 @@ $sql = 'SELECT *
 
 $result = $db->query($sql);
 
-$pattern = '/^queries: info: client ([:.0-9a-f]+)#(\d+): query: ([+.-\w]+) ([A-Z]+) ([0-9A-Z]+) ([-+A-Z]+) \(([:.0-9a-f]+)\)$/';
+$pattern = '/^queries: info: client ([:.0-9a-f]+)#(\d+):(?: view \w+:)? query: ([^ ]+) (IN|CH|HS) ([A-Z]+) ([-+A-Z]+) \(([:.0-9a-f]+)\)$/';
 $queries = array();
 $update = array();
 $delete = array();
@@ -58,7 +58,7 @@ foreach ($result as $log) {
 				'options' => $matches[6],
 				'queried' => strtotime($log['logged']));
 
-		$db->execute('INSERT IGNORE INTO queries (ip, port, hostname, class, type, options, queried) VALUES (\'' . $query['ip'] . '\', ' . $query['port'] . ', \'' . $query['hostname'] . '\', \'' . $query['class'] . '\', \'' . $query['type'] . '\', \'' . $query['options'] . '\', \'' . date('Y-m-d H:i:s', $query['queried']) . ')');
+		$db->execute('INSERT IGNORE INTO queries (ip, port, hostname, class, type, options, queried) VALUES (\'' . $query['ip'] . '\', ' . $query['port'] . ', \'' . $query['hostname'] . '\', \'' . $query['class'] . '\', \'' . $query['type'] . '\', \'' . $query['options'] . '\', \'' . date('Y-m-d H:i:s', $query['queried']) . '\')');
 		$output->add('query parsed', 'debug', 3, $log['logged'], $log['message']);
 		array_push($delete, $log['id']);
 
@@ -113,7 +113,3 @@ if ($updated > 0) {
 else {
 	$output->add('no records updated', 'warning');
 }
-
-$output->send();
-
-?>

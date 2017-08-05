@@ -27,59 +27,96 @@
 require_once 'include/init.php';
 
 $output = Output::start();
-$pw = @$_REQUEST['pw'];
 
-if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
-	$zone = $config['sddns']['zones'][$_REQUEST['zone']];
+// default arguments
+$rdata = @$_REQUEST['rdata'];
+$class = @$_REQUEST['class'];
+$type = @$_REQUEST['type'];
+$ttl = @$_REQUEST['ttl'];
 
-	if (!empty($_REQUEST['host'])) {
-		if (list($host) = DBHost::get($db, array('host' => $_REQUEST['host'], 'zone' => $zone))) {
-			if ($host->checkPassword($pw)  || isAuthentificated()) {
-				if (isset($_REQUEST['class']) && in_array($_REQUEST['class'], $config['sddns']['classes']))
-					$class = $_REQUEST['class'];
-
-				if (isset($_REQUEST['type']) && in_array($_REQUEST['type'], $config['sddns']['types'])) {
-					$type = $_REQUEST['type'];
-
-					if (isset($_REQUEST['rdata']) && Record::isRData($_REQUEST['rdata'], $type))
-						$rdata = $_REQUEST['rdata'];
-				}
-
-				if (@$type == 'URL' || empty($type)) {
-					$uris = DBUri::get($db, array('zone' => $zone, 'host' => $host));
-					foreach ($uris as $uri) {
-						$uri->delete();
-						$output->add('uri deleted from db', 'success', $uri);
-					}
-				}
-
-				if (@$type != 'URL' || empty($type)) {
-					$records = DBRecord::get($db, array('zone' => $zone, 'host' => $host, 'type' => @$type, 'class' => @$class, 'rdata' => @$rdata));
-					foreach ($records as $record) {
-						$record->delete();
-						$output->add('record deleted from db', 'success', $record);
-					}
-				}
-
-				$zone->cleanup($db);
-				$zone->sync($db);
-			}
-			else {
-				$output->add('not authentificated for host', 'error', $host);
-			}
-		}
-		else {
-			$output->add('host not found', 'error', $_REQUEST['host']);
-		}
+// zone
+if (!empty($_REQUEST['zone'])) {
+	if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
+		$zone = $config['sddns']['zones'][$_REQUEST['zone']];
 	}
 	else {
-		$output->add('no host specified', 'error');
+		throw new UserException('invalid zone', $_REQUEST['zone']);
 	}
 }
 else {
-	$output->add('zone not found', 'error', $_REQUEST['zone']);
+	throw new UserException('missing zone');
 }
 
-$output->send();
+// password
+if (!empty($_REQUEST['pw'])) {
+	$pw = $_REQUEST['pw'];
+}
+else if (!empty($_SERVER['PHP_AUTH_PW'])) {
+	$pw = $_SERVER['PHP_AUTH_PW'];
+}
+else {
+	throw new AuthentificationException('missing password');
+}
 
-?>
+// type
+if (!empty($type) && !in_array($type, $config['sddns']['types'])) {
+	throw new UserException('invalid type');
+}
+else if (IpV4::isValid($rdata)) {
+	$type = 'A';
+}
+else if (IpV6::isValid($rdata)) {
+	$type = 'AAAA';
+}
+
+if (!empty($rdata) && !Record::isRdata($rdata, $type)) {
+	throw new UserException('invalid rdata', $rdata);
+}
+
+// search host
+if (!empty($_REQUEST['host'])) {
+	$host = new Host($_REQUEST['host'], $zone);
+
+	if ($host->isRegistred($db)) {
+	        $host = new DBHost($host->isRegistred($db), $db);
+		$output->add('found existing host', 'success', $host);
+	}
+	else {
+		throw new UserException('host not found', $_REQUEST['host']);
+	}
+}
+else {
+	throw new UserException('missing host');
+}
+
+if ($host->checkPassword($pw) || isAuthentificated()) {
+	// search
+	$uris = DBUri::get($db, array('zone' => $zone, 'host' => $host));
+	$records = DBRecord::get($db, array('zone' => $zone, 'host' => $host, 'type' => $type, 'class' => $class, 'rdata' => $rdata, 'ttl' => $ttl));
+
+	if (empty($type)) {
+		$entries = array_merge($uris, $records);
+	}
+	else if ($type == 'URL') {
+		$entries = $uris;
+	}
+	else {
+		$entries = $records;
+	}
+
+	if (empty($entries)) {
+		$output->add('no records found to delete', 'warning');
+	}
+	else {
+		foreach ($entries as $entry) {
+			$entry->delete();
+			$output->add('entry deleted from db', 'success', $entry);
+		}
+
+		$zone->cleanup($db);
+		$zone->sync($db);
+	}
+}
+else {
+	throw new AuthentificationException('not authentificated for host', $host);
+}

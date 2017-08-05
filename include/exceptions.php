@@ -24,11 +24,19 @@
  * along with sddns. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class UserException extends CustomException {}
-class ValidationException extends UserException {}
-class NameServerException extends CustomException {}
-
 class CustomException extends Exception {
+
+	protected $data;
+
+	function __construct($message = '', $data = array(), $code = 0) {
+		$this->data = $data;
+		parent::__construct($message, $code);
+	}
+
+	public function getData() {
+		return $this->data;
+	}
+
 	public function toXml(DOMDocument $doc) {
 		$xmlRecord = $doc->createElement('exception');
 		$xmlRecord->setAttribute('code', $this->code);
@@ -37,7 +45,7 @@ class CustomException extends Exception {
 		$xmlRecord->appendChild($doc->createElement('line', $this->line));
 		$xmlRecord->appendChild($doc->createElement('file', $this->file));
 
-		$xmlRecord->appendChild(backtrace2xml($this->getTrace(), $doc)); 
+		$xmlRecord->appendChild(backtrace2xml($this->getTrace(), $doc));
 
 		return $xmlRecord;
 	}
@@ -47,4 +55,9 @@ class CustomException extends Exception {
 	}
 }
 
-?>
+class NameServerException extends CustomException {}
+class UserException extends CustomException {
+}
+class AuthentificationException extends UserException {}
+class ValidationException extends UserException {}
+class MissingArgumentException extends UserException {}

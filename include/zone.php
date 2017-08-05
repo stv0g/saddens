@@ -25,6 +25,7 @@
  */
 
 class Zone extends NameServer implements Object {
+
 	public $name;
 	private $key;
 
@@ -35,8 +36,8 @@ class Zone extends NameServer implements Object {
 		$this->key = $key;
 	}
 
-	protected function initialize() {
-		parent::initialize();
+	protected function initQueue() {
+		parent::initQueue();
 
 		$this->queueCommand('zone ' . $this->name);
 		$this->queueCommand('key ' . $this->key['name'] . ' ' . $this->key['hmac']);
@@ -46,8 +47,8 @@ class Zone extends NameServer implements Object {
 	 * Maintenance
 	 */
 	function cleanup(Database $db) {
-		$config = Registry::get('config');
-		$output = Registry::get('output');
+		global $config;
+		global $output;
 
 		// expired records & records without host
 		$sql = 'DELETE r FROM ' . $config['db']['tbl']['records'] . ' AS r
@@ -96,12 +97,20 @@ class Zone extends NameServer implements Object {
 	}
 
 	public function sync(Database $db) {
-		$output = Registry::get('output');
+		global $output;
 
 		$nsRecords = $this->getRecordsFromNS();
 		$dbRecords = $this->getRecordsFromDB($db);
+
 		$delete = array_diff($nsRecords, $dbRecords);
 		$add = array_diff($dbRecords, $nsRecords);
+
+		if (empty($delete) && empty($add)) {
+			$output->add('ns in sync', 'success');
+			return true;
+		}
+
+		$this->initQueue();
 
 		foreach ($add as $record) {
 			$this->add($record);
@@ -112,49 +121,47 @@ class Zone extends NameServer implements Object {
 			$this->delete($record);
 			$output->add('record deleted from ns', 'success', $record);
 		}
-	}
 
-	public function add(Record $record) {
-		global $output;
-		$config = Registry::get('config');
+		$result = $this->commitQueue();
 
-		if ($record->host->zone->name != $this->name) {
-			throw new NameServerException('zone mismatch: trying to add record "' . $record . '" to zone "' . $this . '"');
+		if ($result['code']) {
+                        throw new NameServerException('error during nameserver update', $result);
+                }
+
+		if (isAuthentificated()) {
+			$output->add('ns response', 'debug', 7, $result); // includes key!
 		}
 
-		parent::add($record);
-		$nsresult = $this->sendQueue();
-
-		if ($nsresult['code'] != 0) {
-			throw new NameServerException('error during nameserver update: ' . $nsresult['stderr']);
-		}
-
+		$output->add('ns synced', 'success');
 		return true;
 	}
 
+	public function add(Record $record) {
+		global $config;
+
+		if ($record->host->zone->name != $this->name) {
+			throw new NameServerException('zone mismatch: trying to add record ' . $record . ' to zone ' . $this);
+		}
+
+		parent::add($record);
+	}
+
 	public function delete(Record $record) {
-		$config = Registry::get('config');
+		global $config;
 
 		if ($record->host->zone->name != $this->name) {
 			throw new NameServerException('zone mismatch: trying to delete record ' . $record . ' from zone ' . $this);
 		}
 
 		parent::delete($record);
-		$nsresult = $this->sendQueue();
-
-		if($nsresult['code'] != 0) {
-			throw new NameServerException('error during nameserver update: ' . $nsresult['stderr']);
-		}
-
-		return true;
 	}
 
 	/*
 	 * Getter
 	 */
 	public function getRecordsFromNS() {
-		$config = Registry::get('config');
-		$output = Registry::get('output');
+		global $config;
+		global $output;
 
 		$records = array();
 

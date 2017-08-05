@@ -39,6 +39,3 @@ else {
 
 $output->add('your current internet ip address', 'notice', $ip);
 
-$output->send();
-
-?>

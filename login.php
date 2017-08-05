@@ -42,13 +42,9 @@ the credentials required.</p>
 <hr>
 <address>' . $_SERVER['SERVER_SIGNATURE'] . '</address>';
 
-	$output->add('authentification failed', 'error', 'user', @$_SERVER['PHP_AUTH_USER']);
+	throw new AuthentificationException('authentification failed', @$_SERVER['PHP_AUTH_USER']);
 } else {
 	echo '<script language="javascript">window.setTimeout(function(){ window.location="/expert"; }, 1500);</script>';
 
 	$output->add('authentificated as', 'notice', $_SERVER['PHP_AUTH_USER']);
 }
-
-$output->send();
-
-?>

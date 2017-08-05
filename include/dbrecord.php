@@ -25,6 +25,7 @@
  */
 
 class DBRecord extends Record implements DBObject {
+
 	public $id;
 	public $lifetime;
 	public $lastAccessed;
@@ -32,13 +33,11 @@ class DBRecord extends Record implements DBObject {
 	private $db;
 
 	public function __construct($id, Database $db) {
-		$config = Registry::get('config');
+		global $config;
 
 		$this->db = $db;
 
-		$sql = 'SELECT *
-    		FROM ' . $config['db']['tbl']['records'] . '
-    		WHERE id = ' . (int) $id;
+		$sql = 'SELECT * FROM ' . $config['db']['tbl']['records'] . ' WHERE id = ' . (int) $id;
 
 		$result = $this->db->query($sql, 1);
 		$record = $result->first();
@@ -51,12 +50,8 @@ class DBRecord extends Record implements DBObject {
 		parent::__construct($this->host, (int) $record['ttl'], $record['class'], $record['type'], $record['rdata']);
 	}
 
-	public function __destruct() {
-		//$this->update();
-	}
-
 	public function update() {
-		$config = Registry::get('config');
+		global $config;
 
 		$sql = 'UPDATE ' . $config['db']['tbl']['records'] . '
 				SET
@@ -70,6 +65,8 @@ class DBRecord extends Record implements DBObject {
 				WHERE id = ' . (int) $this->id;
 
 		$this->db->execute($sql);
+
+		return $this->db->affectedRows();
 	}
 
 	public function toXml(DOMDocument $doc) {
@@ -84,16 +81,14 @@ class DBRecord extends Record implements DBObject {
 	}
 
 	public function delete() {
-		$config = Registry::get('config');
+		global $config;
 
-		$sql = 'DELETE FROM ' . $config['db']['tbl']['records'] . '
-				WHERE id = ' . (int) $this->id;
-
+		$sql = 'DELETE FROM ' . $config['db']['tbl']['records'] . ' WHERE id = ' . (int) $this->id;
 		$this->db->execute($sql);
 	}
 
 	public static function get(Database $db, $filter = false, $order = array()) {
-		$config = Registry::get('config');
+		global $config;
 
 		$sql = 'SELECT r.id
 				FROM ' .  $config['db']['tbl']['records'] . ' AS r
@@ -137,5 +132,3 @@ class DBRecord extends Record implements DBObject {
 		return $records;
 	}
 }
-
-?>

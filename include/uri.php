@@ -40,8 +40,7 @@ class Uri implements Object {
 	 * Database
 	 */
 	public function add(Database $db, $lifetime) {
-		$config = Registry::get('config');
-		$db = Registry::get('db');
+		global $config;
 
 		$sql = 'INSERT INTO ' . $config['db']['tbl']['uris'] . ' (host_id, uri, frame, lifetime, last_accessed, created, ip) VALUES(
 					' . $this->host->id . ',
@@ -99,4 +98,3 @@ class Uri implements Object {
 	}
 }
 
-?>

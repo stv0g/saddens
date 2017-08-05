@@ -43,7 +43,3 @@ $results = $zone->getRecordsFromNS();
 foreach ($results as $result) {
 	$output->add('', 'data', $result);
 }
-
-$output->send();
-
-?>

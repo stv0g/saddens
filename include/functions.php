@@ -30,15 +30,14 @@ function doAuthentification() {
 }
 
 function isAuthentificated() {
-	$config = Registry::get('config');
-	$htpasswd = file($config['htpasswd']);
+	global $config;
+	$htpasswd = file($config['htpasswd'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
 	foreach ($htpasswd as $line) {
-		list($user, $crypt) = explode(':', $line);
-		$salt = substr($crypt, 0, 2);
+		list($user, $sha1) = explode(':', $line);
 
 		if ($user == @$_SERVER['PHP_AUTH_USER'] &&
-			trim($crypt) == crypt(@$_SERVER['PHP_AUTH_PW'], $salt)) {
+		    $sha1 == '{SHA}' . base64_encode(sha1(@$_SERVER['PHP_AUTH_PW'], true))) {
 			return true;
 		}
 	}
@@ -49,9 +48,11 @@ function isAuthentificated() {
 function randomString($length, $characters='abcdefghijklmnopqrstuvwxyz0123456789') {
 	$random_string = '';
 	$characters_length = strlen($characters);
+
 	for($i = 0; $i<$length; $i++) {
 		$random_string .= $characters[mt_rand(0, $characters_length - 1)];
 	}
+
 	return $random_string;
 }
 
@@ -101,4 +102,3 @@ function backtrace2html($traces) {
 	return $trace;
 }
 
-?>

@@ -25,104 +25,111 @@
  */
 
 require_once 'include/init.php';
+
 $output = Output::start();
+
+// default arguments
+$ttl = (!empty($_REQUEST['ttl'])) ? $_REQUEST['ttl'] : $config['sddns']['std']['ttl'];
+$class = (!empty($_REQUEST['class'])) ? $_REQUEST['class'] : $config['sddns']['std']['class'];
+$rdata = (!empty($_REQUEST['rdata'])) ? $_REQUEST['rdata'] : $_SERVER['REMOTE_ADDR'];
+
+// zone
+if (!empty($_REQUEST['zone'])) {
+	if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
+		$zone = $config['sddns']['zones'][$_REQUEST['zone']];
+	}
+	else {
+		throw new UserException('invalid zone', $_REQUEST['zone']);
+	}
+}
+else {
+	throw new UserException('missing zone');
+}
 
 // password
 if (!empty($_REQUEST['pw'])) {
 	$pw = $_REQUEST['pw'];
 }
-else {
-	$pw = false;
-}
-
-// host & zone
-if (!empty($_REQUEST['hostname'])) {
-	foreach ($config['sddns']['zones'] as $z) {
-		if (substr($_REQUEST['hostname'], -strlen($z->name)) === $z->name) {
-			$zone = $z;
-			list($host) = DBHost::get($db, array('host' => substr($_REQUEST['hostname'], 0, -(strlen($zone->name)+1)), 'zone' => $zone));
-		}
-	}
-}
-elseif (!empty($_REQUEST['host'])) {
-	if (array_key_exists($_REQUEST['zone'], $config['sddns']['zones'])) {
-		$zone = $config['sddns']['zones'][$_REQUEST['zone']];
-		list($host) = DBHost::get($db, array('host' => $_REQUEST['host'], 'zone' => $zone));
-	}
-}
-
-// class
-if (!empty($_REQUEST['class']) && in_array($_REQUEST['class'], $config['sddns']['classes']))
-	$class = $_REQUEST['class'];
-
-// type, rdata and ip
-if (!empty($_REQUEST['type']) && in_array($_REQUEST['type'], $config['sddns']['types'])) {
-	$type = $_REQUEST['type'];
-}
-
-// ip
-if (!empty($_REQUEST['myip'])) {
-	$rdata = $_REQUEST['myip'];
-}
-elseif (!empty($_REQUEST['ip'])) {
-	$rdata = $_REQUEST['ip'];
-}
-elseif (!empty($_REQUEST['rdata'])) {
-		$rdata = $_REQUEST['rdata'];
+else if (!empty($_SERVER['PHP_AUTH_PW'])) {
+	$pw = $_SERVER['PHP_AUTH_PW'];
 }
 else {
-	$rdata = $_SERVER['REMOTE_ADDR'];
+	throw new AuthentificationException('missing password');
 }
 
-if (!empty($zone)) {
-	if (!empty($host)) {
-		if ($type == 'URL') {
-			$entries = DBUri::get($db, array('host' => $host, 'zone' => $zone));
-		}
-		else {
-			$entries = DBRecord::get($db, array('host' => $host, 'zone' => $zone, 'class' => @$class, 'type' => @$type));
-		}
+// type
+if (!empty($_REQUEST['type'])) {
+	if (in_array($_REQUEST['type'], $config['sddns']['types'])) {
+		$type = $_REQUEST['type'];
+        }
+	else {
+		throw new UserException('invalid type');
+	}
+}
+else if (IpV4::isValid($rdata)) {
+	$type = 'A';
+}
+else if (IpV6::isValid($rdata)) {
+	$type = 'AAAA';
+}
+else {
+	throw new UserException('missing type');
+}
 
-		if (count($entries) > 0) {
-			$output->add('found host', 'success', $host);
+// search host
+if (!empty($_REQUEST['host'])) {
+	$host = new Host($_REQUEST['host'], $zone);
 
-			if (isAuthentificated() || $host->checkPassword($pw)) {
-				if ($type == 'URL') {
-					if (isset($_REQUEST['frame'])) $entries[0]->frame = $_REQUEST['frame'];
-
-					$entries[0]->setUri($rdata);
-				}
-				else {
-					$entries[0]->setRData($rdata);
-				}
-				$entries[0]->lastAccessed = time();
-				$entries[0]->update();
-
-				$output->add('entry updated in db', 'success', $entries[0]);
-
-				for ($i = 1; $i < count($entries); $i++) {
-					$records[$i]->delete();
-					$output->add('record deleted from db', 'warning', $entries[$i]);
-				}
-
-				$zone->cleanup($db);
-				$zone->sync($db);
-			}
-			else {
-				$output->add('not authentificated for host', 'error', $host);
-			}
-		}
-		else {
-			$output->add('nothing found to update', 'warning');
-		}
+	if ($host->isRegistred($db)) {
+	        $host = new DBHost($host->isRegistred($db), $db);
+		$output->add('found existing host', 'success', $host);
 	}
 	else {
-		$output->add('host not found', 'error', @$_REQUEST['host'], @$_REQUEST['hostname']);
+		throw new UserException('host not found', $_REQUEST['host']);
 	}
 }
 else {
-	$output->add('zone not found', 'error', $_REQUEST['host'], $_REQUEST['zone']);
+	throw new UserException('missing host');
 }
 
-$output->send();
-?>
+if ($host->checkPassword($pw) || isAuthentificated()) {
+	// search entries
+	if ($type == 'URL') {
+		$entries = DBUri::get($db, array('host' => $host, 'zone' => $zone));
+	}
+	else {
+		$entries = DBRecord::get($db, array('host' => $host, 'zone' => $zone, 'class' => $class, 'type' => $type));
+	}
+
+	if (empty($entries)) {
+		throw new UserException('no records found to update');
+	}
+
+	$entry = array_shift($entries);
+
+	if ($type == 'URL') {
+		$entry->frame = (isset($_REQUEST['frame']) && $_REQUEST['frame']) ? 1 : 0;
+		$entry->setUri($rdata);
+	}
+	else {
+		$entry->setTtl($ttl);
+		$entry->setRData($rdata);
+	}
+
+	$entry->lastAccessed = time();
+	$entry->update();
+
+	$output->add('entry updated in db', 'success', $entry);
+
+	// delete other entries
+	foreach ($entries as $entry) {
+		$entry->delete();
+		$output->add('record deleted from db', 'warning', $entry);
+	}
+
+	$zone->cleanup($db);
+	$zone->sync($db);
+}
+else {
+	throw new AuthentificationException('not authentificated for host', $host);
+}

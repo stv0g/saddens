@@ -67,7 +67,3 @@ else {
 		$output->add($row['type'], 'data', round(($row['sum'] / $count) * 100, 5) . ' %', $row['sum']);
 	}
 }
-
-$output->send();
-
-?>

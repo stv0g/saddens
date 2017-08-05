@@ -25,6 +25,7 @@
  */
 
 class NameServer implements Object {
+
 	protected $process;
 	protected $pipes;
 
@@ -34,81 +35,101 @@ class NameServer implements Object {
 	public $port;
 
 	public function __construct($hostname, $port = 53) {
-		$config = Registry::get('config');
+		global $config;
 
 		$this->hostname = $hostname;
 		$this->port = $port;
 	}
 
-	protected function initialize() {
-		$output = Registry::get('output');
-		$config = Registry::get('config');
+	protected function open() {
+		global $output;
 
-		$descriptorspec = array(0 => array('pipe', 'r'),	// stdin
-		1 => array('pipe', 'w'),	// stdout
-		2 => array('pipe', 'w'));	// stderr
+		$descriptorspec = array(
+			0 => array('pipe', 'r'),	// stdin
+			1 => array('pipe', 'w'),	// stdout
+			2 => array('pipe', 'w')		// stderr
+		);
 
 		if ($this->isRunning()) {
-			$this->close();
+			throw new NameserverException('ns connection' , 'already established');
 		}
 
 		$this->process = proc_open('nsupdate -d -v', $descriptorspec, $this->pipes);
-		$output->add('ns initialized', 'debug', 1);
+
+		if ($this->isRunning()) {
+			$output->add('ns connection', 'debug', 3, 'established');
+		}
+		else {
+			throw new NameserverException('ns connection', 'failed');
+		}
+
+		return true;
+	}
+
+	protected function close() {
+		global $output;
+
+		if (!$this->isRunning()) {
+			throw new NameserverException('there is no running process to close');
+		}
+
+		fclose($this->pipes[0]);
+
+		$result['stdout'] = stream_get_contents($this->pipes[1]);
+		$result['stderr'] = stream_get_contents($this->pipes[2]);
+
+		fclose($this->pipes[1]);
+		fclose($this->pipes[2]);
+
+		$result['code'] = proc_close($this->process);
+
+		$output->add('ns connection', 'debug', 3, 'closed');
+
+		$this->process = null;
+
+		return $result;
+	}
+
+	protected function initQueue() {
+		global $config;
+
+		$this->queue = array();
 
 		$this->queueCommand('server ' . $this->hostname . ' ' . $this->port);
 		$this->queueCommand('class ' . $config['sddns']['std']['class']);
+		$this->queueCommand('ttl ' . $config['sddns']['std']['ttl']);
 	}
 
-	protected final function close() {
-		$output = Registry::get('output');
-
-		if ($this->isRunning()) {
-			fclose($this->pipes[0]);
-
-			$return['stdout'] = stream_get_contents($this->pipes[1]);
-			$return['stderr'] = stream_get_contents($this->pipes[2]);
-
-			fclose($this->pipes[1]);
-			fclose($this->pipes[2]);
-
-			$return['code'] = proc_close($this->process);
-
-			$this->process = null;
-
-			$output->add('connection to ns closed', 'debug', 1);
-
-			return $return;
-		}
-		else {
-			throw new CustomException('There is no running process to close.');
+	private function sendQueue() {
+		while ($command = array_shift($this->queue)) {
+			$this->sendCommand($command);
 		}
 	}
 
-	protected final function sendQueue() {
-		$output = Registry::get('output');
-		$site = Registry::get('site');
+	protected function commitQueue() {
+		$this->open();
 
-		if ($output->debug > 2)
-			$this->queueCommand('show');
+		$this->queueCommand('show');
 		$this->queueCommand('send');
-		$output->add('send queue to ns', 'debug', 1);
+		$this->queueCommand('answer');
+
+		$this->sendQueue();
 
 		return $this->close();
 	}
 
-	protected final function queueCommand($command) {
-		$output = Registry::get('output');
+	private function sendCommand($command) {
+		global $output;
 
-		if (!$this->isRunning()) {
-			$this->initialize();
-		}
-
-		fwrite($this->pipes[0], $command . "\n");
-		$this->queue[] = $command;
+                fwrite($this->pipes[0], $command . "\n");
 
 		if (substr($command, 0, 3) != 'key') {
-			$output->add('added command to ns queue', 'debug', 3, $command);
+			$output->add('ns command', 'debug', 3, $command);
 		}
+	}
+
+	protected function queueCommand($command) {
+		$this->queue[] = $command;
 	}
 
 	protected function add(Record $record) {
@@ -124,15 +145,16 @@ class NameServer implements Object {
 	}
 
 	public function query($host, $type = 'A', $class = 'IN') {
-		$output = Registry::get('output');
-		$config = Registry::get('config');
+		global $output;
+		global $config;
 
 		$cli = 'dig -c ' . $class . ' -t ' . $type . ' ' . $host . ' @' . $this->hostname . ' +noall +answer';
 		$output->add('execute dig', 'debug', 2, $cli);
 		exec(escapeshellcmd($cli), $return, $returnCode);
 
-		if ($returnCode != 0)
-			throw new NameServerException('dig query failed with code: ' . $returnCode);
+		if ($returnCode != 0) {
+			throw new NameServerException('dig query', 'failed', $returnCode);
+		}
 
 		$results = array();
 
@@ -170,4 +192,3 @@ class NameServer implements Object {
 	}
 }
 
-?>

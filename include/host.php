@@ -25,6 +25,7 @@
  */
 
 class Host implements Object {
+
 	public $punycode;
 	public $zone;
 	public $generated;
@@ -41,14 +42,14 @@ class Host implements Object {
 		}
 		else {
 			if (strlen($hostname) > 63)
-				throw new UserException('Invalid hostname: too long');
+				throw new UserException('invalid hostname', 'too long');
 			else
-				throw new UserException('Invalid hostname: ' . idn_to_ascii($hostname));
+				throw new UserException('invalid hostname', idn_to_ascii($hostname));
 		}
 	}
 
 	public static function unique(Zone $zone, Database $db) {
-		$config = Registry::get('config');
+		global $config;
 
 		$sql = 'SELECT hostname
 				FROM ' . $config['db']['tbl']['hosts'] . '
@@ -84,7 +85,7 @@ class Host implements Object {
 	}
 
 	public function isRegistred(Database $db) {
-		$config = Registry::get('config');
+		global $config;
 
 		$sql = 'SELECT *
 			FROM ' . $config['db']['tbl']['hosts'] . '
@@ -100,7 +101,7 @@ class Host implements Object {
 	 * Database
 	 */
 	public function add($pw, Database $db) {
-		$config = Registry::get('config');
+		global $config;
 
 		$sql = 'INSERT INTO ' .  $config['db']['tbl']['hosts'] . ' (hostname, zone, password, generated)
 				VALUES (
@@ -144,4 +145,3 @@ class Host implements Object {
 	}
 }
 
-?>

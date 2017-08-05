@@ -29,8 +29,7 @@ require_once dirname(__FILE__) . '/db.php';
 /**
  * @brief base exception for mysql queries
  */
-class MySqlException extends DatabaseException
-{
+class MySqlException extends DatabaseException {
 	function __construct($message = null, $code = 0) {
 		$message = sprintf('%04d: %s', mysql_errno(), mysql_error());
 		parent::__construct($message, mysql_errno());
@@ -40,8 +39,7 @@ class MySqlException extends DatabaseException
 /**
  * @brief resultset of a mysql query
  */
-class MySqlResult extends DBResultSet
-{
+class MySqlResult extends DBResultSet {
 	/**
 	 * @param resource $resource mysql resultset
 	 */
@@ -81,6 +79,7 @@ class MySql extends Database {
 	public function connect($host, $user, $pw) {
 		$this->close();
 		$__er = error_reporting(E_ERROR);
+
 		if (!$this->resource = mysql_connect($host, $user, rawurlencode($pw))) {
 			error_reporting($__er);
 			throw new MySqlException();
@@ -93,8 +92,10 @@ class MySql extends Database {
 	 * @brief close database connection
 	 */
 	public function close() {
-		if (!$this->resource)
+		if (!$this->resource) {
 			return;
+		}
+
 		mysql_close($this->resource);
 		$this->resource = false;
 	}
@@ -104,8 +105,10 @@ class MySql extends Database {
 	 * @param string $name database name
 	 */
 	public function select($db) {
-		if (!mysql_select_db($db, $this->resource))
+		if (!mysql_select_db($db, $this->resource)) {
 			throw new MySqlException();
+		}
+
 		$this->database = $db;
 	}
 
@@ -115,11 +118,13 @@ class MySql extends Database {
 	 * @return mixed
 	 */
 	public function execute($sql) {
-		if ($output = Registry::get('output'))
-			$output->add('db query', 'debug', 8, $sql);
+		global $output;
 
-		if (!($result = mysql_unbuffered_query($sql, $this->resource)))
+		if ($output) $output->add('db query', 'debug', 8, $sql);
+
+		if (!($result = mysql_unbuffered_query($sql, $this->resource))) {
 			throw new MySqlException();
+		}
 
 		return $result;
 	}
@@ -132,8 +137,10 @@ class MySql extends Database {
 	 * @return TDatabaseResultSet
 	 */
 	public function query($sql, $limit = -1, $offset = 0) {
-		if ($limit != -1)
+		if ($limit != -1) {
 			$sql .= sprintf(' LIMIT %d, %d', $offset, $limit);
+		}
+
 		return new MySqlResult($this->execute($sql));
 	}
 
@@ -153,5 +160,3 @@ class MySql extends Database {
 		return mysql_affected_rows($this->resource);
 	}
 }
-
-?>

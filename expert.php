@@ -31,86 +31,109 @@ $output = Output::start('html');
 $output->add('hits since launch', 'notice', $site['hits']);
 
 if (isAuthentificated()) {
-	$output->add('authetificated as', 'notice', $_SERVER['PHP_AUTH_USER']);
+	$output->add('authentificated as', 'notice', $_SERVER['PHP_AUTH_USER']);
 }
 
-$ttl = (isset($_REQUEST['ttl'])) ? $_REQUEST['ttl'] : $config['sddns']['std']['ttl'];
-$lifetime = (isset($_REQUEST['lifetime'])) ? $_REQUEST['lifetime'] : (isAuthentificated()) ? 0 : $config['sddns']['std']['lifetime'];
-$checkedClass = (isset($_REQUEST['class'])) ? $_REQUEST['class'] : $config['sddns']['std']['class'];
-$checkedType = (isset($_REQUEST['type'])) ? $_REQUEST['type'] : $config['sddns']['std']['type'];
+$ttl = (!empty($_REQUEST['ttl'])) ? $_REQUEST['ttl'] : $config['sddns']['std']['ttl'];
+$lifetime = (!empty($_REQUEST['lifetime'])) ? $_REQUEST['lifetime'] : (isAuthentificated()) ? 0 : $config['sddns']['std']['lifetime'];
+$class = (!empty($_REQUEST['class'])) ? $_REQUEST['class'] : $config['sddns']['std']['class'];
+$rdata = (!empty($_REQUEST['rdata'])) ? $_REQUEST['rdata'] : $_SERVER['REMOTE_ADDR'];
 
+// type
+if (!empty($_REQUEST['type'])) {
+	if (in_array($_REQUEST['type'], $config['sddns']['types'])) {
+		$type = $_REQUEST['type'];
+	}
+	else {
+		throw new UserException('invalid type');
+	}
+}
+else if (IpV4::isValid($rdata)) {
+	$type = 'A';
+}
+else if (IpV6::isValid($rdata)) {
+	$type = 'AAAA';
+}
+else {
+	$type = $config['sddns']['std']['type'];
+}
 ?>
+
 <div id="expert">
-<div style="float: right;"><a href="http://dev.0l.de"><img src="images/nulll_small.png" alt="/dev/nulll" /></a></div>
-<h1>Tiny DNS & URL</h1>
-<h3>Expert interface</h3>
-<p>by <a href="http://www.steffenvogel.de">Steffen Vogel</a></p>
-<hr style="clear: both;" />
-<form onsubmit="submit_expert(this);" method="post">
+	<div style="float: right;">
+		<a href="http://dev.0l.de">
+			<img src="images/nulll_small.png" alt="/dev/nulll" />
+		</a>
+	</div>
+	<h1>Tiny DNS & URL</h1>
+	<h3>Expert interface</h3>
+	<p>by <a href="http://www.steffenvogel.de">Steffen Vogel</a></p>
+	<hr style="clear: both;" />
+	<form onsubmit="submit_expert(this);" method="post" autocomplete="off" >
 	<table>
 		<tr>
 			<td><label for="command">operation</label></td>
 			<td><select name="command" size="1">
-
-				<?php
-				foreach ($config['sddns']['cmds'] as $cmd) {
+				<?php foreach ($config['sddns']['cmds'] as $cmd) {
 					echo '<option' . ((@$_REQUEST['command'] == $cmd) ? ' selected="selected"' : '') . ' value="' . $cmd . '">' . $cmd . '</option>';
-				}
-				?>
-
+				} ?>
 			</select></td>
 		</tr>
 		<tr>
 			<td><label for="format">format</label></td>
 			<td><select name="format" size="1">
-
-				<?php
-				foreach ($config['sddns']['formats'] as $format) {
+				<?php foreach ($config['sddns']['formats'] as $format) {
 					echo '<option  value="' . $format . '">' . $format . '</option>';
-				}
-				?>
-
-				<option><i>none</i></option></select></td>
+				} ?>
+				<option><i>none</i></option>
+			</select></td>
 			<td><input type="checkbox" name="debug" value="1" /> include debugging information</td>
 		</tr>
-		<tr><td><label for="host">hostname</label></td><td><input type="text" name="host" value="<?php echo @$_REQUEST['host']; ?>" />.<select name="zone" size="1">';
-
-																	<?php
-																	foreach ($config['sddns']['zones'] as $zone) {
-																		echo '<option' . (($_REQUEST['zone'] == $zone->name) ? ' selected="selected"' : '') . ' value="' . $zone->name . '">' . $zone->name . '</option>';
-																	}
-																	?>
-
-																	</select></td><td>optional; random or servername</td></tr>
-		<tr><td><label for="ttl">ttl</label></td><td><input type="text" name="ttl" value="<?php echo $ttl; ?>" /> seconds</td><td>time to live in cache; max <?php echo $config['sddns']['max_ttl']; ?> seconds</td></tr>
-		<tr><td><label for="lifetime">lifetime</label></td><td><input type="text" name="lifetime" value="<?php echo $lifetime; ?>" /> seconds</td><td>lifetime of a record/url without being updated/touched; max <?php echo (isAuthentificated()) ? '0 (unlimited)' : $config['sddns']['max_lifetime']; ?></td></tr>
+		<tr>
+			<td><label for="host">hostname</label></td>
+			<td><input type="text" name="host" value="<?php echo @$_REQUEST['host']; ?>" size="40" />.<select name="zone" size="1">';
+				<?php foreach ($config['sddns']['zones'] as $zone) {
+					echo '<option' . (($_REQUEST['zone'] == $zone->name) ? ' selected="selected"' : '') . ' value="' . $zone->name . '">' . $zone->name . '</option>';
+				} ?>
+			</select></td>
+			<td>optional; random or servername</td>
+		</tr>
+		<tr>
+			<td><label for="ttl">ttl</label></td>
+			<td><input type="text" name="ttl" value="<?php echo $ttl; ?>" size="10"/> seconds</td>
+			<td>time to live in cache; max <?php echo $config['sddns']['max_ttl']; ?> seconds</td>
+		</tr>
+		<tr>
+			<td><label for="lifetime">lifetime</label></td>
+			<td><input type="text" name="lifetime" value="<?php echo $lifetime; ?>" size="10" /> seconds</td>
+			<td>lifetime of a record/url without being updated/touched; max <?php echo (isAuthentificated()) ? '0 (unlimited)' : $config['sddns']['max_lifetime']; ?></td>
+		</tr>
 		<tr>
 			<td><label for="class">class</label></td>
 			<td><select name="class" size="1">
-
-				<?php
-				foreach ($config['sddns']['classes'] as $class) {
-					echo '<option' . (($class == $checkedClass) ? ' selected="selected"' : '') . ' value="' . $class . '">' . $class . '</option>';
-				}
-				?>
-
-				<option><i>all</i></option></select></td>
+				<?php foreach ($config['sddns']['classes'] as $c) {
+					echo '<option' . (($c == $class) ? ' selected="selected"' : '') . ' value="' . $c . '">' . $c . '</option>';
+				} ?>
+			<option><i>all</i></option></select></td>
 		</tr>
 		<tr>
 			<td><label for="type">type</label></td>
 			<td><select name="type" size="1">
-
-				<?php
-				foreach ($config['sddns']['types'] as $type) {
-					echo '<option' . (($type == $checkedType) ? ' selected="selected"' : '') . ' value="' . $type . '">' . $type . '</option>';
-				}
-				?>
-
-					<option><i>all</i></option></select></td>
+				<?php foreach ($config['sddns']['types'] as $t) {
+					echo '<option' . (($t == $type) ? ' selected="selected"' : '') . ' value="' . $t . '">' . $t . '</option>';
+				} ?>
+			<option value=""><i>all</i></option></select></td>
 		</tr>
-		<tr><td><label for="rdata">rdata</label></td><td><input value="<?php echo (empty($_REQUEST['rdata']) && $checkedType == 'A') ? $_SERVER['REMOTE_ADDR'] : @$_REQUEST['rdata']; ?>" type="text" name="rdata" /></td><td><input type="checkbox" value="1" name="frame" /> hide uri in a frameset</td></tr>
-		 <tr><td><label for="pw">password</label></td><td><input type="password" name="pw" /></td><td>optional; random generated</td></tr>
-
+		<tr>
+			<td><label for="rdata">rdata</label></td>
+			<td><input value="<?php echo $rdata; ?>" type="text" size="50" name="rdata" /></td>
+			<td><input type="checkbox" value="1" name="frame" /> hide uri in a frameset</td>
+		</tr>
+		<tr>
+			<td><label for="pw">password</label></td>
+			<td><input type="password" name="pw" size="50" /></td>
+			<td>optional; random generated</td>
+		</tr>
 	</table>
 	<input type="submit" />
 </form>
@@ -126,7 +149,3 @@ $checkedType = (isset($_REQUEST['type'])) ? $_REQUEST['type'] : $config['sddns']
 <address><?php echo $_SERVER['SERVER_SIGNATURE']; ?></address>
 
 </div>
-
-<?php
-$output->send();
-?>

@@ -38,7 +38,3 @@ foreach ($zones as $zone) {
 	$output->add('syncing zone', 'notice', $zone);
 	$zone->sync($db);
 }
-
-$output->send();
-
-?>

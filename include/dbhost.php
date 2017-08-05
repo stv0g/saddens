@@ -32,7 +32,7 @@ class DBHost extends Host implements DBObject {
 	private $db;
 
 	public function __construct($id, Database $db) {
-		$config = Registry::get('config');
+		global $config;
 
 		$this->db = $db;
 
@@ -45,16 +45,12 @@ class DBHost extends Host implements DBObject {
 			parent::__construct($host['hostname'], $config['sddns']['zones'][$host['zone']], $host['generated']);
 		}
 		else {
-			throw new CustomException('Host with id ' . $id . ' not found!');
+			throw new CustomException('host not found by id', $id);
 		}
 	}
 
-	public function __destruct() {
-		//$this->update();
-	}
-
 	public function update() {
-		$config = Registry::get('config');
+		global $config;
 
 		$sql = 'UPDATE ' . $config['db']['tbl']['hosts'] . '
 				SET
@@ -68,13 +64,13 @@ class DBHost extends Host implements DBObject {
 	}
 
 	public function delete() {
-		$config = Registry::get('config');
+		global $config;
 
 		if ($this->getRecordsFromDB() > 0) {
-			throw new UserException('Host has records!');
+			throw new UserException('host has records');
 		}
 		elseif ($this->getUrisFromDB() > 0) {
-			throw new UserException('Host has uris!');
+			throw new UserException('host has uris');
 		}
 		else {
 			$sql = 'DELETE FROM ' .  $config['db']['tbl']['hosts'] . '
@@ -84,7 +80,7 @@ class DBHost extends Host implements DBObject {
 	}
 
 	public function checkPassword($pw) {
-		$config = Registry::get('config');
+		global $config;
 
 		$sql = 'SELECT password
 			     FROM ' .  $config['db']['tbl']['hosts'] . '
@@ -105,7 +101,7 @@ class DBHost extends Host implements DBObject {
 	}
 
 	public static function get(Database $db, $filter = false, $order = array()) {
-		$config = Registry::get('config');
+		global $config;
 
 		$sql = 'SELECT id
 				FROM ' .  $config['db']['tbl']['hosts'] . '
@@ -149,5 +145,3 @@ class DBHost extends Host implements DBObject {
 		return $xmlRecord;
 	}
 }
-
-?>

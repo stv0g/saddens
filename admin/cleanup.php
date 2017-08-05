@@ -42,7 +42,3 @@ foreach ($zones as $name => $zone) {
 	$output->add('cleaning zone', 'notice', $zone);
 	$zone->cleanup($db);
 }
-
-$output->send();
-
-?>

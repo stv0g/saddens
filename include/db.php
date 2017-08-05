@@ -165,5 +165,3 @@ abstract class Database implements IDatabase {
 	 */
 	protected $statements = array();
 }
-
-?>

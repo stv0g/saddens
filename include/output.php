@@ -25,6 +25,7 @@
  */
 
 class JsonOutput extends Output {
+
 	public function __construct($debug) {
 		parent::__construct('application/json', 'UTF-8', $debug);
 	}
@@ -48,6 +49,7 @@ class JsonOutput extends Output {
 }
 
 class XmlOutput extends Output {
+
 	public function __construct($debug) {
 		parent::__construct('text/xml', 'UTF-8', $debug);
 	}
@@ -86,11 +88,12 @@ class XmlOutput extends Output {
 
 // needs JPGraph >= 3.0.7!
 class GraphOutput extends Output {
+
 	private $graph;
 
 	public function __construct($debug) {
 		parent::__construct('text/html', 'UTF-8', $debug);
-		$site = Registry::get('site');
+		global $site;
 
 		require_once 'jpgraph/jpgraph.php';
 	}
@@ -110,20 +113,21 @@ class GraphOutput extends Output {
 
 
 	public function showGraph() {
-		if (@isset($this->graph))
+		if (isset($this->graph))
 		$this->graph->Stroke();
 	}
 
-	protected function getOutput() {	// TODO beautify
-	if (count($this->getMessages()) > 0) {
-		echo '<pre>';
-		print_r($this->getMessages());
-		echo '</pre>';
-	}
+	protected function getOutput() {	// TODO
+		if (count($this->getMessages()) > 0) {
+			echo '<pre>';
+			print_r($this->getMessages());
+			echo '</pre>';
+		}
 	}
 }
 
 class GifOutput extends Output {
+
 	public function __construct() {
 		parent::__construct('image/gif');
 	}
@@ -140,6 +144,7 @@ class GifOutput extends Output {
 }
 
 class PlainLineOutput extends Output {
+
 	public function __construct($debug, $fields = array('index', 'time', 'type', 'description', 'data'), $delimiter = "\t", $lineDelimiter = "\n", $escape = true) {
 		parent::__construct('text/plain', 'UTF-8', $debug);
 		$this->fields = $fields;
@@ -159,7 +164,7 @@ class PlainLineOutput extends Output {
 			foreach ($this->fields as $fieldIndex => $field) {
 				switch ($field) {
 					case 'type':
-						fwrite($fd, $message['type']);
+						fwrite($fd, '[' . $message['type'] . ']');
 						break;
 
 					case 'index':
@@ -175,9 +180,7 @@ class PlainLineOutput extends Output {
 						break;
 
 					case 'data':
-						foreach ($message['data'] as $object) {
-							fwrite($fd, $this->delimiter . $object);
-						}
+						fwrite($fd, implode(', ', $message['data']));
 						break;
 					default:
 						fwrite($fd, $message[$field]);
@@ -199,6 +202,7 @@ class PlainLineOutput extends Output {
 }
 
 class HtmlOutput extends Output {
+
 	public function __construct($debug) {
 		parent::__construct('text/html', 'UTF-8', $debug);
 
@@ -206,7 +210,8 @@ class HtmlOutput extends Output {
 	}
 
 	protected function getOutput() {
-		$site = Registry::get('site');
+		global $site;
+
 		$columnCount = 0;
 		$messages = $this->getMessages();
 		$html = ob_get_clean();
@@ -271,6 +276,7 @@ class HtmlOutput extends Output {
 }
 
 abstract class Output {
+
 	protected $messages = array();
 	public $debug = 0;
 	public $format;
@@ -282,7 +288,6 @@ abstract class Output {
 		$this->encoding = $encoding;
 		$this->debug = $debug;
 
-		if ($this->contentType != null)
 		header('Content-type: ' . $this->contentType . (($this->encoding != null) ? '; charset=' . $this->encoding : ''));
 	}
 
@@ -300,8 +305,7 @@ abstract class Output {
 		}
 
 		for ($i = ($type == 'debug') ? 3 : 2; $i < $argc; $i++) {
-			if (empty($argv[$i]))
-			continue;
+			if (empty($argv[$i])) continue;
 
 			if (!is_array($argv[$i])) {
 				$message['data'][] = $argv[$i];
@@ -315,19 +319,16 @@ abstract class Output {
 	}
 
 	protected function getMessages($exclude = true, $args = null) {
-		$types = array('notice', 'success', 'error', 'exception', 'warning', 'data'); // 'debug');
+		$types = array('notice', 'success', 'error', 'exception', 'warning', 'data', 'debug');
 
 		if ($args == null)
-		$args = array();
+			$args = array();
 
-		if ($exclude)
-		$types = array_diff($types, $args);
-		else
-		$types = $args;
+		$types = ($exclude) ? array_diff($types, $args) : $args;
 
 		$messages = array();
 		foreach ($this->messages as $message) {
-			if (in_array($message['type'], $types) || ($message['type'] == 'debug' && $message['level'] <= $this->debug)) {
+			if (in_array($message['type'], $types) && ($message['type'] != 'debug' || $message['level'] <= $this->debug)) {
 				$messages[] = $message;
 			}
 		}
@@ -342,15 +343,11 @@ abstract class Output {
 				break;
 
 			case 'txt':
-				return new PlainLineOutput($debug, array('index', 'time', 'type', 'description', 'data'), "\t", "\n");
+				return new PlainLineOutput($debug, array('type', 'description', 'data'), "\t", "\n");
 				break;
 
 			case 'csv':
 				return new PlainLineOutput($debug, array('time', 'type', 'description', 'data'), ";", "\n");
-				break;
-
-			case 'dyndns':
-				return new DynDnsOutput();
 				break;
 
 			case 'png':
@@ -374,26 +371,25 @@ abstract class Output {
 
 	static function start($forced = null) {
 		global $argc;
-
-		$site = Registry::get('site');
+		global $site;
 
 		if (isset($forced))
 			$format = $forced;
 		elseif (isset($argc))
 		        $format = 'txt';
-		elseif ($_SERVER['SERVER_NAME'] === 'members.dyndns.org')
-		        $format = 'dyndns';
 		elseif (empty($_REQUEST['format']) || @$_REQUEST['format'] == 'php')
 		        $format = 'html';
 		else
 		        $format = $_REQUEST['format'];
 
 		$output = self::getInstance($format, $site['debug']);
-		Registry::set('output', $output);
 
 		// errorhandling
 		set_exception_handler(array($output, 'exception_handler'));
 		set_error_handler(array($output, 'error_handler'), E_ALL);
+
+		// shutdown
+		register_shutdown_function(array($output, 'send'));
 
 		// debugging
 		$parameters = array();
@@ -408,16 +404,27 @@ abstract class Output {
 	}
 
 	function exception_handler($exception) {
-		$this->add('unhandled ' . get_class($exception), 'exception', (array) $exception);
-		$this->debug = 7; // increase verbosity in case of an exception
-		$this->send();
+		if (is_subclass_of($exception, 'CustomException')) {
+			$this->add($exception->getMessage(), 'error', $exception->getData());
+		}
+		else {
+			$this->debug = 7; // increase verbosity in case of an exception
+			$this->add(get_class($exception), 'exception', (array) $exception);
+		}
+
+		switch (get_class($exception)) {
+			case 'CustomException': http_response_code(500); break;
+			case 'UserException': http_response_code(400); break;
+			case 'ValidationException': http_response_code(400); break;
+			case 'AuthentificationException': http_response_code(403); break;
+			default: $code = 500; break;
+		}
+
+		exit(1);
 	}
 
 	function error_handler($errno, $errstr, $errfile, $errline) {
-		if (($errno & error_reporting()) == 0) {
-			return;
-		}
-		else {
+		if (($errno & error_reporting()) != 0) {
 			switch ($errno) {
 				case E_USER_WARNING:
 				case E_WARNING:
@@ -438,7 +445,7 @@ abstract class Output {
 					$str = $type;
 					break;
 			}
-			$this->add($str . ' in script', $type, $errstr . ' in ' . $errfile . ':' . $errline);
+			$this->add($str, $type, $errstr . ' in ' . $errfile . ':' . $errline);
 		}
 	}
 
@@ -448,5 +455,3 @@ abstract class Output {
 		echo $this->getOutput();
 	}
 }
-
-?>

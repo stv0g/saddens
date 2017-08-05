@@ -2,17 +2,6 @@ function submit_expert(form) {
 	form.action = form.elements['command'].value + '.' + form.format.value;
 }
 
-function submit_simple(form) {
-	var matches = form.elements['rdata'].value.match(/^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/);
-	
-	if (matches) {
-		form.elements['type'].value = 'A';
-	}
-	else {
-		form.elements['type'].value = 'URL';
-	}
-}
-
 function fade(elm) {
 	if (ie) {
 		elm.style.filter = 'alpha(opacity=' + op + ')';

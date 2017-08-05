@@ -25,32 +25,33 @@
  */
 
 class Record implements Object {
+
 	public $host, $ttl, $class, $type, $rdata;
 
 	/*
 	 * Constructors
 	 */
 	public function __construct(Host $host, $ttl, $class, $type, $rdata) {
-		$config = Registry::get('config');
+		global $config;
 
 		$this->host = $host;
 
 		if (is_int($ttl) && $ttl > 0 && $ttl <= $config['sddns']['max_ttl']) {
 			$this->ttl = $ttl;
 		} else {
-			throw new UserException('Invalid ttl: ' . $ttl);
+			throw new UserException('Invalid ttl', $ttl);
 		}
 
 		if (in_array($class, $config['sddns']['classes'])) {
 			$this->class = $class;
 		} else {
-			throw new UserException('Invalid class: ' . $class);
+			throw new UserException('invalid class', $class);
 		}
 
 		if (in_array($type, $config['sddns']['types'])) {
 			$this->type = $type;
 		} else {
-			throw new UserException('Invalid type: ' . $type);
+			throw new UserException('invalid type', $type);
 		}
 
 		$this->setRData($rdata);
@@ -72,22 +73,31 @@ class Record implements Object {
 					$this->rdata = $rdata;
 			}
 		} else {
-			throw new ValidationException('Invalid rdata: ' . $rdata);
+			throw new ValidationException('invalid rdata', $rdata);
 		}
 	}
+
+	public function setTtl($ttl) {
+		if (is_numeric($ttl)) {
+			$this->ttl = $ttl;
+		}
+		else {
+			throw new ValidationException('invalid ttl', $ttl);
+		}
+	}
+
 
 	/*
 	 * Database
 	 */
 	public function add(Database $db, $lifetime) {
-		$config = Registry::get('config');
-		$db = Registry::get('db');
+		global $config;
 
 		if ($this->host->isRegistred($db)) {
 			$host = new DBHost($this->host->isRegistred($db), $db);
 		}
 		else {
-			throw new UserException('Unable to add record: Host is not registred!');
+			throw new UserException('unable to add record: host is not registred!');
 		}
 
 		$sql = 'INSERT INTO ' . $config['db']['tbl']['records'] . ' (host_id, ttl, class, type, rdata, created, last_accessed, lifetime, ip) VALUES (
@@ -144,7 +154,7 @@ class Record implements Object {
 	}
 
 	public function isRegistred(Database $db) {
-		$config = Registry::get('config');
+		global $config;
 
 		$sql = 'SELECT *
 			FROM ' .  $config['db']['tbl']['records'] . ' AS r
@@ -200,7 +210,7 @@ class Record implements Object {
 	}
 
 	public function toHtml() {
-		$html = '' . $this->host->toHtml() . '&nbsp;<a target="_blank" href="/?host=' . $this->host->toPunycode() . '&ttl=' . $this->ttl . '&type=' . $this->type . '&class=' . $this->class . '&rdata=' . $this->rdata . '">' . $this->ttl . '&nbsp;' . $this->class . '&nbsp;' . $this->type . '</a>';
+		$html = '' . $this->host->toHtml() . '&nbsp;<a target="_blank" href="/expert?host=' . $this->host->toPunycode() . '&ttl=' . $this->ttl . '&type=' . $this->type . '&class=' . $this->class . '&rdata=' . $this->rdata . '">' . $this->ttl . '&nbsp;' . $this->class . '&nbsp;' . $this->type . '</a>';
 
 		$html .= '&nbsp;';
 		switch ($this->type) {
@@ -211,7 +221,7 @@ class Record implements Object {
 
 			case 'NS':
 			case 'CNAME':
-				$html .= '<a target="_blank" href="http://' . $this->rdata . '">' . $this->rdata . '</a>';
+				$html .= '<a target="_blank" href="https://www.ultratools.com/whois/whoisDashboardResult?domainName=' . $this->rdata . '">' . $this->rdata . '</a>';
 			break;
 
 			default:
@@ -223,4 +233,3 @@ class Record implements Object {
 	}
 }
 
-?>

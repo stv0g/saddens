@@ -32,7 +32,3 @@ $result = $db->query('SELECT DISTINCT hostname, COUNT(hostname) AS sum FROM quer
 foreach ($result as $row) {
 	$output->add($row['hostname'], 'data', $row['sum']);
 }
-
-$output->send();
-
-?>

@@ -59,7 +59,3 @@ if (isAuthentificated()) {
 <a href="javascript:installSearchEngine('<?php echo $site['url']; ?>/opensearch.xml');">search plugin</a>
 <address><?php echo $_SERVER['SERVER_SIGNATURE']; ?></address>
 </div>
-
-<?php
-$output->send();
-?>

@@ -25,6 +25,7 @@
  */
 
 class IpV4 implements Object {
+
 	public $tuples = array();
 
 	public function __construct($ipString) {
@@ -45,7 +46,7 @@ class IpV4 implements Object {
         }
 
         public function toHtml() {
-		return '<a href="http://www.dnsstuff.com/tools/ipall/?tool_id=67&ip=' . $this . '">' . $this . '</a>';
+		return '<a href="https://www.ultratools.com/tools/ipWhoisLookupResult?ipAddress=' . $this . '">' . $this . '</a>';
         }
 
 	public function toXml(DOMDocument $doc) {
@@ -57,14 +58,15 @@ class IpV4 implements Object {
 }
 
 class IpV6 implements Object {
+
 	private $ip;
 
 	public function __construct($ipString) {
 		if (self::isValid($ipString)) {
-                        $this->ip = $ipString;
+                        $this->ip = strtolower($ipString);
                 }
                 else {
-                        throw new ValidationException('Invalid IP: ', $ipString);
+                        throw new ValidationException('invalid ip', $ipString);
                 }
 	}
 
@@ -77,7 +79,7 @@ class IpV6 implements Object {
         }
 
         public function toHtml() {
-                return '<a href="http://www.dnsstuff.com/tools/ipall/?tool_id=67&ip=' . $this . '">' . $this . '</a>';
+                return '<a href="https://www.ultratools.com/tools/ipv6InfoResult?ipAddress=' . $this . '">' . $this . '</a>';
         }
 
         public function toXml(DOMDocument $doc) {
@@ -87,5 +89,3 @@ class IpV6 implements Object {
                 return $xmlIpV6;
         }
 }
-
-?>

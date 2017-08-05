@@ -33,7 +33,7 @@ class DBUri extends Uri implements DBObject {
 	private $db;
 
 	public function __construct($id, Database $db) {
-		$config = Registry::get('config');
+		global $config;
 
 		$this->db = $db;
 
@@ -54,12 +54,8 @@ class DBUri extends Uri implements DBObject {
 		parent::__construct($uri['uri'], $this->host);
 	}
 
-	public function __destruct() {
-		//$this->update();
-	}
-
 	public function update() {
-		$config = Registry::get('config');
+		global $config;
 
 		$sql = 'UPDATE ' . $config['db']['tbl']['uris'] . '
 				SET
@@ -86,7 +82,7 @@ class DBUri extends Uri implements DBObject {
 	}
 
 	public function delete() {
-		$config = Registry::get('config');
+		global $config;
 
 		$sql = 'DELETE FROM ' . $config['db']['tbl']['uris'] . '
 				WHERE id = ' . (int) $this->id;
@@ -95,7 +91,7 @@ class DBUri extends Uri implements DBObject {
 	}
 
 	public static function get(Database $db, $filter = false, $order = array()) {
-		$config = Registry::get('config');
+		global $config;
 
 		$sql = 'SELECT u.id
 				FROM ' .  $config['db']['tbl']['uris'] . ' AS u
@@ -134,5 +130,3 @@ class DBUri extends Uri implements DBObject {
 		return $uris;
 	}
 }
-
-?>
